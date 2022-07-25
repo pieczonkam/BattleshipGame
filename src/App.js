@@ -1,23 +1,25 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import Board from './components/Board';
+import Card from './components/Card';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className='App'>
+      <main className='flexbox'>
+        
+        <Board id='board-1' className='board'>
+          <Card id='card-1' className='card' draggable='true'>
+            <p>Card one</p>
+          </Card>
+        </Board>
+
+        <Board id='board-2' className='board'>
+          <Card id='card-2' className='card' draggable='true'>
+            <p>Card two</p>
+          </Card>
+        </Board>
+
+      </main>
     </div>
   );
 }
