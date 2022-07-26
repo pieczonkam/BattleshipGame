@@ -1,14 +1,12 @@
 import React from 'react';
 
 function Card(props) {
-
     const dragStart = e => {
-        const target = e.target;
-
-        e.dataTransfer.setData('card_id', target.id);
+        e.dataTransfer.setData('card_id', e.target.id);
 
         setTimeout(() => {
-            target.style.display = 'none';
+            // e.target.style.opacity = '0.5';
+            e.target.style.display = 'none';
         }, 0);
     }
 
@@ -16,8 +14,13 @@ function Card(props) {
         e.stopPropagation();
     }
 
+    const dragEnd = e => {
+        // e.target.style.opacity = '1.0';
+        e.target.style.display = 'block';
+    }
+
     return (
-        <div id={props.id} className={props.className} draggable={props.draggable} onDragStart={dragStart} onDragOver={dragOver}> 
+        <div id={props.id} className={props.className} draggable={props.draggable} onDragStart={dragStart} onDragOver={dragOver} onDragEnd={dragEnd}> 
             { props.children }
         </div>
     );
