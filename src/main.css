@@ -1,11 +1,10 @@
 * {
-  /* margin: 0; */
-  /* padding: 0; */
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
 body {
-  margin: 0;
   background-color: #f3f3f3;
 }
 
@@ -14,13 +13,13 @@ body {
   text-align: center;
 }
 
-/* .flexbox {
+.flexbox {
   display: flex;
   justify-content: space-between;
 
   width: 100%;
   max-width: 768px;
-  height: 100vh;
+  height: 85vh;
 
   overflow: hidden;
 
@@ -46,7 +45,7 @@ body {
 
   cursor: pointer;
   margin-bottom: 15px;
-} */
+}
 
 .nav {
   background-color: #333;
