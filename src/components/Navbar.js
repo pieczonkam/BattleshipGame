@@ -7,7 +7,8 @@ function Navbar() {
             <Link to='/' className='site-title'>Site Name</Link>
             <ul>
                 <CustomLink to='/game'>Game</CustomLink>
-                <CustomLink to='/about'>About</CustomLink>
+                <CustomLink to='/login'>Login</CustomLink>
+                <CustomLink to='/register'>Register</CustomLink>
             </ul>
         </nav>
     );

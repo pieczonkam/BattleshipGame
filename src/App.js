@@ -1,10 +1,9 @@
 import React from 'react';
-import Board from './components/Board';
-import Card from './components/Card';
+import Home from './components/Home'
 import Navbar from './components/Navbar';
-import Game from './pages/Game';
-import About from './pages/About';
-import Home from './pages/Home';
+import Game from './components/game/Game';
+import Login from './components/authentication/Login';
+import Register from './components/authentication/Register';
 import { Route, Routes } from 'react-router-dom';
 
 function App() {
@@ -17,7 +16,8 @@ function App() {
         <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/game' element={<Game />} />
-          <Route path='/about' element={<About />} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/register' element={<Register />} />
         </Routes>
       </div>
     </>
