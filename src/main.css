@@ -86,4 +86,19 @@ body {
   background-color: #777;
 }
 
+.square {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    line-height: 35px;
+    background-color: turquoise;
+    border: 2px solid cyan;
+}
+
+.square:hover {
+    background-color: red;
+    border: 2px solid darkred;
+}
+
+
 
