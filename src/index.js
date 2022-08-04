@@ -6,6 +6,7 @@ import reportWebVitals   from './reportWebVitals';
 import App from './App';
 
 import './styles/main.css'
+import './styles/navbar.css'
 import './styles/game.css'
 import './styles/authentication.css'
 

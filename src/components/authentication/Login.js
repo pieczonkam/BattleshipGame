@@ -7,17 +7,17 @@ function Login() {
     const database = [
         {
             email:    'user1@mail.com',
-            password: 'pass1'
+            password: '12345678'
         },
         {
             email:    'user2@mail.com',
-            password: 'pass2'
+            password: 'qwertyui'
         }
     ];
 
     const errors = {
-        email: 'Niepoprawny adres e-mail',
-        pass:  'Niepoprawne hasło'
+        email: 'Podano niepoprawny adres e-mail',
+        pass:  'Podano niepoprawne hasło'
     };
 
     const handleSubmit = e => {
