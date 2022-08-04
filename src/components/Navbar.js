@@ -1,14 +1,15 @@
-import React from 'react';
+import React                               from 'react';
 import { Link, useMatch, useResolvedPath } from 'react-router-dom';
 
 function Navbar() {
     return (
         <nav className='nav'>
-            <Link to='/' className='site-title'>Site Name</Link>
+            <Link to='/' className='site-title'>Statki Online</Link>
             <ul>
-                <CustomLink to='/game'>Game</CustomLink>
-                <CustomLink to='/login'>Login</CustomLink>
-                <CustomLink to='/register'>Register</CustomLink>
+                <CustomLink to='/game'>Gra</CustomLink>
+                <CustomLink to='/login'>Zaloguj się</CustomLink>
+                <CustomLink to='/register'>Zarejestruj się</CustomLink>
+                <CustomLink to='/change_password'>Zmień hasło</CustomLink>
             </ul>
         </nav>
     );
