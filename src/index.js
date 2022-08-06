@@ -2,13 +2,12 @@ import React             from 'react';
 import ReactDOM          from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import reportWebVitals   from './reportWebVitals';
+import App               from './App';
 
-import App from './App';
-
-import './styles/main.css'
-import './styles/navbar.css'
-import './styles/game.css'
-import './styles/authentication.css'
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './styles/main.css';
+import './styles/game.css';
+import './styles/authentication.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
