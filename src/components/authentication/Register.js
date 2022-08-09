@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Navigate }        from 'react-router-dom'
 
 function Register() {
     const [error_messages, setErrorMessages] = useState([]);
@@ -18,11 +19,15 @@ function Register() {
     ];
 
     const errors = {
-        email_wrong:    'Niepoprawny adres e-mail',
-        email_taken:    'Adres e-mail jest już zajęty',
-        uname:          'Nazwa użytkownika jest już zajęta',
-        pass_too_short: 'Hasło powinno składać się z przynajmniej 8 znaków',
-        pass_diff:      'Podano różne hasła'
+        email_missing:   'Proszę podać adres e-mail',
+        uname_missing:   'Proszę podać nazwę użytkownika',
+        pass_01_missing: 'Proszę podać hasło',
+        pass_02_missing: 'Proszę powtórzyć hasło',
+        wrong_email:     'Podano błędny adres e-mail',
+        email_taken:     'Podany adres e-mail jest już zajęty',
+        uname_taken:     'Podana nazwa użytkownika jest już zajęta',
+        pass_too_short:  'Podane hasło jest za krótkie (min. 8 znaków)',
+        pass_diff:       'Podano różne hasła'
     };
 
     const validateEmail = email => {
@@ -44,27 +49,43 @@ function Register() {
         var error_messages_arr = []
         var user_valid = true;
 
-        if (email_exists) {
+        if (email.value.length === 0 || uname.value.length === 0 || pass_01.value.length === 0 || pass_02.value.length === 0) {
             user_valid = false;
-            error_messages_arr.push({ name: 'email_taken', message: errors.email_taken });
-        } else if (!validateEmail(email.value)) {
-            user_valid = false;
-            error_messages_arr.push({ name: 'email_wrong', message: errors.email_wrong });
-        }
-
-        if (uname_exists) {
-            user_valid = false;
-            error_messages_arr.push({ name: 'uname', message: errors.uname });
-        }
-
-        if (pass_01.value.length < 8) {
-            user_valid = false;
-            error_messages_arr.push({ name: 'pass_too_short', message: errors.pass_too_short });
-        }
-
-        if (pass_01.value !== pass_02.value) {
-            user_valid = false;
-            error_messages_arr.push({ name: 'pass_diff', message: errors.pass_diff });
+            if (email.value.length === 0) {
+                error_messages_arr.push({ name: 'email_missing', message: errors.email_missing });
+            }
+            if (uname.value.length === 0) {
+                error_messages_arr.push({ name: 'uname_missing', message: errors.uname_missing });
+            }
+            if (pass_01.value.length === 0) {
+                error_messages_arr.push({ name: 'pass_01_missing', message: errors.pass_01_missing });
+            }
+            if (pass_02.value.length === 0) {
+                error_messages_arr.push({ name: 'pass_02_missing', message: errors.pass_02_missing });
+            }
+        } else {
+            if (email_exists) {
+                user_valid = false;
+                error_messages_arr.push({ name: 'email_taken', message: errors.email_taken });
+            } else if (!validateEmail(email.value)) {
+                user_valid = false;
+                error_messages_arr.push({ name: 'wrong_email', message: errors.wrong_email });
+            }
+    
+            if (uname_exists) {
+                user_valid = false;
+                error_messages_arr.push({ name: 'uname_taken', message: errors.uname_taken });
+            }
+    
+            if (pass_01.value.length < 8) {
+                user_valid = false;
+                error_messages_arr.push({ name: 'pass_too_short', message: errors.pass_too_short });
+            }
+    
+            if (pass_01.value !== pass_02.value) {
+                user_valid = false;
+                error_messages_arr.push({ name: 'pass_diff', message: errors.pass_diff });
+            }
         }
 
         setErrorMessages(error_messages_arr);
@@ -76,53 +97,55 @@ function Register() {
 
         if (error_message) {
             return (
-                <div className='error'>{error_message.message}</div>
+                <label className='Auth-form-error text-danger'>{error_message.message}</label>
             );
         }
     };
         
-    const renderForm = (
-        <div className='form'>
-            <form onSubmit={handleSubmit}>
-                <div className='input-container'>
-                    <label>Adres e-mail</label>
-                    <input type='text' name='email' required />
-                    {renderErrorMessage('email_wrong')} 
-                    {renderErrorMessage('email_taken')}
-                </div>
-                <div className='input-container'>
-                    <label>Nazwa użytkownika</label>
-                    <input type='text' name='uname' required />
-                    {renderErrorMessage('uname')}
-                </div>
-                <div className='input-container'>
-                    <label>Hasło</label>
-                    <input type='password' name='pass_01' required />
-                    {renderErrorMessage('pass_too_short')}
-                </div>
-                <div className='input-container'>
-                    <label>Powtórz hasło</label>
-                    <input type='password' name='pass_02' required />
-                    {renderErrorMessage('pass_diff')}
-                </div>
-                <div className='button-container'>
-                    <input type='submit' value='Zarejestruj się' />
-                </div>
-                <div className='link-container'>
-                    Masz już konto?{'\n'}
-                    <a href='/login'>Zaloguj się!</a>
-                </div>
-            </form>
-        </div>
-    );    
-
     return (
-        <div className='login-container'>
-            <div className='login-form'>
-                <div className='title'>Rejestracja</div>
-                {is_submitted ? <div>Rejestracja powiodła się</div> : renderForm}
-            </div>
-        </div>
+        <>
+            {is_submitted ? <Navigate to='/' replace /> :
+            <div className='Auth-form-container my-4'>
+                <form className='Auth-form' onSubmit={handleSubmit}>
+                    <div className='Auth-form-content'>
+                        <h3 className='Auth-form-title'>Rejestracja</h3>
+                        <div className='form-group mt-3'>
+                            <label className='Auth-form-label'>Adres e-mail</label>
+                            <input type='text' className='form-control mt-1' placeholder='Wprowadź adres e-mail' name='email' />
+                            {renderErrorMessage('email_missing')}
+                            {renderErrorMessage('wrong_email')} 
+                            {renderErrorMessage('email_taken')}            
+                        </div>
+                        <div className='form-group mt-3'>
+                            <label className='Auth-form-label'>Nazwa użytkownika</label>
+                            <input type='text' className='form-control mt-1' placeholder='Wprowadź nazwę użytkownika' name='uname' />
+                            {renderErrorMessage('uname_missing')}
+                            {renderErrorMessage('uname_taken')}           
+                        </div>
+                        <div className='form-group mt-3'>
+                            <label className='Auth-form-label'>Hasło</label>
+                            <input type='password' className='form-control mt-1' placeholder='Wprowadź hasło' name='pass_01'/>
+                            {renderErrorMessage('pass_01_missing')}
+                            {renderErrorMessage('pass_too_short')}
+                        </div>
+                        <div className='form-group mt-3'>
+                            <label className='Auth-form-label'>Powtórz hasło</label>
+                            <input type='password' className='form-control mt-1' placeholder='Wprowadź hasło' name='pass_02'/>
+                            {renderErrorMessage('pass_02_missing')}
+                            {renderErrorMessage('pass_diff')}
+                        </div>
+                        <div className='d-grid gap-2 mt-3'>
+                            <button type='submit' className='btn btn-primary'>
+                                Zarejestruj się
+                            </button>
+                        </div>
+                        <p className='text-right mt-2'>
+                            Masz już konto? <a href='/login'>Zaloguj się!</a>
+                        </p>
+                    </div>
+                </form>
+            </div>}
+        </>
     );
 }
 

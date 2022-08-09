@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-
+import React, { useState } from 'react'
+import { Navigate }        from 'react-router-dom'
+ 
 function Login() {
-    const [error_message, setErrorMessage] = useState({});
-    const [is_submitted,  setIsSubmitted ] = useState(false);
+    const [error_messages, setErrorMessages] = useState([]);
+    const [is_submitted,   setIsSubmitted  ] = useState(false);
 
     const database = [
         {
@@ -16,8 +17,10 @@ function Login() {
     ];
 
     const errors = {
-        email: 'Podano niepoprawny adres e-mail',
-        pass:  'Podano niepoprawne hasło'
+        email_missing: 'Proszę podać adres e-mail',
+        pass_missing:  'Proszę podać hasło',
+        wrong_email:   'Podano błędny adres e-mail',
+        wrong_pass:    'Podano błędne hasło'
     };
 
     const handleSubmit = e => {
@@ -26,53 +29,74 @@ function Login() {
         var { email, pass } = document.forms[0];
         const user_data = database.find(user => user.email === email.value);
 
-        if (user_data) {
-            if (user_data.password !== pass.value) {
-                setErrorMessage({ name: 'pass', message: errors.pass });
-            } else {
-                setIsSubmitted(true);
+        var error_messages_arr = [];
+        var user_valid         = true;
+
+        if (email.value.length === 0 || pass.value.length === 0) {
+            user_valid = false;
+            if (email.value.length === 0) {
+                error_messages_arr.push({ name: 'email_missing', message: errors.email_missing });
+            }
+            if (pass.value.length === 0) {
+                error_messages_arr.push({ name: 'pass_missing', message: errors.pass_missing });
             }
         } else {
-            setErrorMessage({ name: 'email', message: errors.email });
+            if (user_data) {
+                if (user_data.password !== pass.value) {
+                    user_valid = false;
+                    error_messages_arr.push({ name: 'wrong_pass', message: errors.wrong_pass });
+                }
+            } else {
+                user_valid = false;
+                error_messages_arr.push({ name: 'wrong_email', message: errors.wrong_email });
+            }
+        } 
+
+        setErrorMessages(error_messages_arr);
+        setIsSubmitted(user_valid);
+    };
+
+    const renderErrorMessage = name => {
+        const error_message = error_messages.find(em => em.name === name);
+        
+        if (error_message) {
+            return (
+                <label className='Auth-form-error text-danger'>{error_message.message}</label>
+            );
         }
     };
 
-    const renderErrorMessage = name => 
-        name === error_message.name && (
-            <div className='error'>{error_message.message}</div>
-        );
-
-    const renderForm = (
-        <div className='form'>
-            <form onSubmit={handleSubmit}>
-                <div className='input-container'>
-                    <label>Adres e-mail</label>
-                    <input type='text' name='email' required />
-                    {renderErrorMessage('email')}
-                </div>
-                <div className='input-container'>
-                    <label>Hasło</label>
-                    <input type='password' name='pass' required />
-                    {renderErrorMessage('pass')}
-                </div>
-                <div className='button-container'>
-                    <input type='submit' value='Zaloguj się' />
-                </div>
-                <div className='link-container'>
-                    Chcesz założyć nowe konto?{'\n'}
-                    <a href='/register'>Zarejestruj się!</a>
-                </div>
-            </form>
-        </div>
-    );    
-
     return (
-        <div className='login-container'>
-            <div className='login-form'>
-                <div className='title'>Logowanie</div>
-                {is_submitted ? <div>Logowanie powiodło się</div> : renderForm}
-            </div>
-        </div>
+        <>
+            {is_submitted ? <Navigate to='/' replace /> :
+            <div className='Auth-form-container my-4'>
+                <form className='Auth-form' onSubmit={handleSubmit}>
+                    <div className='Auth-form-content'>
+                        <h3 className='Auth-form-title'>Logowanie</h3>
+                        <div className='form-group mt-3'>
+                            <label className='Auth-form-label'>Adres e-mail</label>
+                            <input type='text' className='form-control mt-1' placeholder='Wprowadź adres e-mail' name='email' />
+                            {renderErrorMessage('email_missing')}
+                            {renderErrorMessage('wrong_email')}              
+                        </div>
+                        <div className='form-group mt-3'>
+                            <label className='Auth-form-label'>Hasło</label>
+                            <input type='password' className='form-control mt-1' placeholder='Wprowadź hasło' name='pass'/>
+                            {renderErrorMessage('pass_missing')}
+                            {renderErrorMessage('wrong_pass')}
+                        </div>
+                        <div className='d-grid gap-2 mt-3'>
+                            <button type='submit' className='btn btn-primary'>
+                                Zaloguj się
+                            </button>
+                        </div>
+                        <p className='text-right mt-2'>
+                            Nie masz konta? <a href='/register'>Zarejestruj się!</a>
+                        </p>
+                    </div>
+                </form>
+            </div>}
+        </>
     );
 }
 
