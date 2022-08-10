@@ -1,11 +1,11 @@
 import { Nav, Navbar, NavLink } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUserPlus, faArrowRightToBracket, faShip } from '@fortawesome/free-solid-svg-icons'
+import { faUserPlus, faArrowRightToBracket, faShip, faUser } from '@fortawesome/free-solid-svg-icons'
 
 function NavigationBar() {
     return (
-        <Navbar collapseOnSelect expand='sm' bg='dark' variant='dark' className='navigationbar'>
+        <Navbar collapseOnSelect expand='sm' bg='dark' variant='dark' className='px-2'>
             <Navbar.Brand href='/'>Statki Online</Navbar.Brand>
             <Navbar.Toggle aria-controls='navbarScroll' data-bs-toggle='collapse' data-bs-target='#navbarScroll' />
             <Navbar.Collapse id='navbarScroll'>
@@ -25,6 +25,10 @@ function NavigationBar() {
                     <NavLink  eventKey='5' as={Link} to='/' className='mx-1'>
                         <FontAwesomeIcon icon={faArrowRightToBracket} flip='horizontal' />
                         <span>&nbsp;&nbsp;Wyloguj się</span>
+                    </NavLink>
+                    <NavLink  eventKey='6' as={Link} to='/profile' className='mx-1'>
+                        <FontAwesomeIcon icon={faUser} />
+                        <span>&nbsp;&nbsp;Profil</span>
                     </NavLink>
                 </Nav>
             </Navbar.Collapse>     

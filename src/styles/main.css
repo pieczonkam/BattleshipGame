@@ -1,24 +1,24 @@
+/* body */
+
 body {
     background-color: #f8f9fd;
 }
+
+/* App */
 
 .App {
     font-family: sans-serif;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    
 }
 
-.navigationbar {
-    padding: 5px 10px;
-}
+/* Auth forms */
 
 .Auth-form-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100vw;
 }
   
 .Auth-form {
@@ -52,4 +52,104 @@ body {
 .Auth-form-error {
     font-size: 12px;
     font-weight: 600;
+}
+
+/* Game */
+
+.Game-container {    
+    justify-content: center;
+    width: 100%;
+    overflow: hidden;
+    margin: 0 auto;
+}
+  
+.Game-board {
+    display: flex;
+    flex-direction: column;
+    width: 45%;
+    background-color: white;
+    border: 2px solid black;
+    padding: 20px 15px 80px 15px;
+    margin: 20px;
+}
+
+.Game-boat {
+    padding: 5px 10px;
+    min-height: 50px;
+    text-align: center;
+    background-color: rgb(126, 228, 228);
+    border: 2px solid rgb(41, 232, 232);
+    border-radius: 50px;
+    cursor: pointer;
+    margin-bottom: 15px;  
+}
+
+.boat-1 {
+    width: 40%;
+}
+
+.boat-2 {
+    width: 60%;
+}
+
+.boat-3 {
+    width: 80%;
+}
+
+.boat-4 {
+    width: 100%;
+}
+
+/* Profile */
+
+.Profile-container {
+    justify-content: center;
+    width: 100%;
+    overflow: hidden;
+    margin: 0 auto;
+    min-height: 500px;
+}
+
+.Profile-details {
+    background-color: blue;
+    width: 20%;
+}
+
+.Profile-change-data {
+    background-color: red;
+    width: 20%;
+}
+
+.Profile-table-container {
+    background-color: green;
+    width: 60%;
+}
+
+/* Media */
+
+@media only screen and (max-width: 576px) {
+    .Game-container {
+        align-items: center;
+    }
+
+    .Game-board {
+        width: 90%;
+    }
+
+    .Profile-details {
+        background-color: darkorange;
+        width: 100%;
+    }
+    
+    .Profile-change-data {
+        background-color: darkorange;
+        width: 100%;
+    }
+    
+    .Profile-table-container {
+        background-color: darkorange;
+        width: 100%;
+        height: 60%;
+    }
+
 }

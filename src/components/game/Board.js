@@ -4,10 +4,10 @@ function Board(props) {
     const drop = e => {
         e.preventDefault();
 
-        const card_id = e.dataTransfer.getData('card_id');
-        const card    = document.getElementById(card_id);
+        const boat_id = e.dataTransfer.getData('boat_id');
+        const boat    = document.getElementById(boat_id);
         
-        e.target.appendChild(card);
+        e.target.appendChild(boat);
     }
     
     const dragOver = e => {

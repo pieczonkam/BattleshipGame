@@ -6,6 +6,7 @@ import NavigationBar  from './components/NavigationBar';
 import Game           from './components/game/Game';
 import Login          from './components/authentication/Login';
 import Register       from './components/authentication/Register';
+import Profile        from './components/profile/Profile';
 import ChangePassword from './components/authentication/ChangePassword';
 
 function App() {  
@@ -17,6 +18,7 @@ function App() {
                 <Route path='/game'            element={<Game />} />
                 <Route path='/login'           element={<Login />} />
                 <Route path='/register'        element={<Register />} />
+                <Route path='/profile'         element={<Profile />} />
                 <Route path='/change_password' element={<ChangePassword />} />
                 <Route path='*'                element={<Navigate to='/' replace />} />
             </Routes>

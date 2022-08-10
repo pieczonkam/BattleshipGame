@@ -1,12 +1,12 @@
 import React from 'react';
 
-function Card(props) {
+function Boat(props) {
     const dragStart = e => {
-        e.dataTransfer.setData('card_id', e.target.id);
+        e.dataTransfer.setData('boat_id', e.target.id);
 
         setTimeout(() => {
-            // e.target.style.opacity = '0.5';
-            e.target.style.display = 'none';
+            e.target.style.opacity = '0.5';
+            // e.target.style.display = 'none';
         }, 0);
     }
 
@@ -15,8 +15,8 @@ function Card(props) {
     }
 
     const dragEnd = e => {
-        // e.target.style.opacity = '1.0';
-        e.target.style.display = 'block';
+        e.target.style.opacity = '1.0';
+        // e.target.style.display = 'block';
     }
 
     return (
@@ -26,4 +26,4 @@ function Card(props) {
     );
 }
 
-export default Card;
+export default Boat;
