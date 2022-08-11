@@ -1,7 +1,7 @@
 import React from 'react';
 
-import Board  from './Board'
-import Boat   from './Boat'
+import Board  from './Board';
+import Boat   from './Boat';
 // import Square from './Square'
 
 function Game() {
@@ -28,7 +28,7 @@ function Game() {
     // }
 
     return (
-        <div className='Game-container my-4 d-flex flex-column flex-sm-row'>
+        <div className='Game-container my-4 d-flex flex-column flex-md-row'>
             <Board id='board-1' className='Game-board'>
                 <Boat id='boat-1' className='Game-boat boat-1' draggable='true' />
                 <Boat id='boat-2' className='Game-boat boat-2' draggable='true' />

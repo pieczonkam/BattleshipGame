@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Navigate }        from 'react-router-dom'
+import React, { useState } from 'react';
+import { Navigate }        from 'react-router-dom';
  
 function Login() {
     const [error_messages, setErrorMessages] = useState([]);
