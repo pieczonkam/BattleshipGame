@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Navigate }        from 'react-router-dom';
 
+import validateEmail       from '../../utils/validateEmail';
+
 function Register() {
     const [error_messages, setErrorMessages] = useState([]);
     const [is_submitted,   setIsSubmitted  ] = useState(false);
@@ -30,15 +32,6 @@ function Register() {
         pass_diff:       'Podano różne hasła'
     };
 
-    const validateEmail = email => {
-        let email_valid = String(email)
-              .toLowerCase()
-              .match(
-                  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-              ) === null ? false : true;
-        return email_valid;
-      };
-
     const handleSubmit = e => {
         e.preventDefault();
 
@@ -46,7 +39,7 @@ function Register() {
         const email_exists = database.find(user => user.email === email.value);
         const uname_exists = database.find(user => user.uname === uname.value);
 
-        var error_messages_arr = []
+        var error_messages_arr = [];
         var user_valid = true;
 
         if (email.value.length === 0 || uname.value.length === 0 || pass_01.value.length === 0 || pass_02.value.length === 0) {

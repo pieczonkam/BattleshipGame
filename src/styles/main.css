@@ -66,7 +66,8 @@ body {
 .Game-board {
     display: flex;
     flex-direction: column;
-    width: 45%;
+    /* width: 47.5%; */
+    width: 20%;
     background-color: white;
     border: 2px solid black;
     padding: 20px 15px 80px 15px;
@@ -75,7 +76,7 @@ body {
 
 .Game-boat {
     padding: 5px 10px;
-    min-height: 50px;
+    min-height: 30px;
     text-align: center;
     background-color: rgb(126, 228, 228);
     border: 2px solid rgb(41, 232, 232);
@@ -125,19 +126,92 @@ body {
     font-weight: 600;
 }
 
-.Profile-user-change-data {
-    width: 100%;
+.Profile-change-data-container, .Profile-search-container, .Profile-notification-buttons-container {
+    justify-content: space-between;
+}
+
+.Profile-change-data-input, .Profile-search-input {
+    width: 77%;
+}
+
+.Profile-change-data-button, .Profile-search-button {
+    width: 20%;
+}
+
+.Profile-change-data-error {
+    font-size: 12px;
+    font-weight: 600;
 }
 
 .Profile-table-container {
     background-color: white;
     border-radius: 8px;
-    width: 60%;
+    width: 65%;
     margin: 20px;
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+    max-height: 600px;
+}
+
+.Profile-table-button-01 {
+    width: 33.3333%;
+    border-radius: 8px 0 0 0;
+}
+
+.Profile-table-button-02 {
+    width: 33.3333%;
+    border-radius: 0;
+}
+
+.Profile-table-button-03 {
+    width: 33.3333%;
+    border-radius: 0 8px 0 0;
+}
+
+.Profile-table {
+    overflow: auto;
+}
+
+.Profile-game-result-text {
+    font-weight: 600;
+}
+
+.Profile-notification-container {
+    max-height: 300px;
+    overflow: auto;
+}
+
+/* Others */
+
+th, td {
+    text-align: center;
+}
+
+.notification {
+    display: inline;
+    font-size: 12px;
+    color: white;
+    padding: 2px 5px;
+    border-radius: 100px;
+    position: relative;
+    top: -1px;
+    left: 5px;
+}
+
+.text-bold {
+    font-weight: 600;
 }
 
 /* Media */
+
+@media only screen and (max-width: 1031.8px) {
+    .Profile-user-panel {
+        width: 45%;
+    }
+
+    .Profile-table-container {
+        width: 50%;
+    }
+}
 
 @media only screen and (max-width: 767.8px) {
     .Game-container {
@@ -145,7 +219,8 @@ body {
     }
 
     .Game-board {
-        width: 90%;
+        /* width: 95%; */
+        width: 20%;
     }
 
     .Profile-container {
@@ -153,10 +228,28 @@ body {
     }
     
     .Profile-user-panel {
-        width: 90%;
+        width: 95%;
     }
 
     .Profile-table-container {
-        width: 90%;
+        width: 95%;
     }
+}
+
+/* Custom scrollbar */
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+  
+::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+}
+   
+::-webkit-scrollbar-thumb {
+    background: #888; 
+}
+  
+::-webkit-scrollbar-thumb:hover {
+    background: #555; 
 }
