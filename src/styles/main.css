@@ -57,48 +57,138 @@ body {
 /* Game */
 
 .Game-container {    
+    display: flex;
+    flex-direction: row;
     justify-content: center;
-    width: 100%;
     overflow: hidden;
     margin: 0 auto;
 }
-  
-.Game-board {
-    display: flex;
-    flex-direction: column;
-    /* width: 47.5%; */
-    width: 20%;
-    background-color: white;
-    border: 2px solid black;
-    padding: 20px 15px 80px 15px;
-    margin: 20px;
+
+.Game-board-a, .Game-board-b {
+    margin: 15px;
 }
 
-.Game-boat {
-    padding: 5px 10px;
-    min-height: 30px;
+.Game-board-a {
+    margin-right: 30px;
+}
+
+.Game-board-b {
+    margin-left: 30px;
+}
+
+.Game-board-a-outer {
+    display: grid;
+    grid-template: 1fr / 1fr;
+    place-items: center;
+}
+
+.Game-board-a-outer > * {
+    grid-column: 1 / 1;
+    grid-row: 1 / 1;
+}
+
+.Game-board-a-inner-bottom {
+    z-index: -100;
+}
+
+.Game-board-a-inner-top {
+    z-index: 100;
+}
+
+.Game-board-title {
+    font-size: 26px;
+    margin-left: 40px;
+}
+
+.Game-board-tile-text {
+    width: 40px;
+    height: 40px;
     text-align: center;
-    background-color: rgb(126, 228, 228);
-    border: 2px solid rgb(41, 232, 232);
+    line-height: 40px;
+}
+
+.Game-board-tile-bg {
+    width: 40px;
+    height: 40px;
+    background-color: aqua;
+    border: 1px solid black;
+}
+
+.Game-board-tile {
+    width: 40px;
+    height: 40px;
+    background-color: transparent;
+    border: 1px solid transparent;
+}
+  
+.Game-ships-container-horizontal, .Game-ships-container-vertical {
+    background-color: transparent;
+    border: 2px solid black;
+    padding: 10px;
+    margin: 20px;
+    min-height: 100px;
+    min-width: 100px;
+    max-width: 600px;
+}
+
+.Game-ships-container-vertical {
+    display: flex;
+    flex-direction: row;
+}
+
+.Game-ship {
+    margin: 5px;
+    background-color: rgb(101, 101, 101);
+    border: 2px solid rgb(45, 45, 45);
     border-radius: 50px;
     cursor: pointer;
-    margin-bottom: 15px;  
+    display: inline-block;
+    z-index: 200;
 }
 
-.boat-1 {
-    width: 40%;
+.Game-ship:hover{
+    background-color: rgb(66, 66, 66);
+    border: 2px solid rgb(17, 17, 17);
 }
 
-.boat-2 {
-    width: 60%;
+.ship-1-horizontal {
+    width: 70px;
+    height: 30px;
 }
 
-.boat-3 {
-    width: 80%;
+.ship-1-vertical {
+    width:  30px;
+    height: 70px;
 }
 
-.boat-4 {
-    width: 100%;
+.ship-2-horizontal {
+    width:  110px;
+    height: 30px;
+}
+
+.ship-2-vertical {
+    width:  30px;
+    height: 110px;
+}
+
+.ship-3-horizontal {
+    width:  150px;
+    height: 30px;
+}
+
+.ship-3-vertical {
+    width:  30px;
+    height: 150px;
+}
+
+.ship-4-horizontal {
+    width:  190px;
+    height: 30px;
+}
+
+.ship-4-vertical {
+    width:  30px;
+    height: 190px;
 }
 
 /* Profile */
@@ -213,14 +303,16 @@ th, td {
     }
 }
 
-@media only screen and (max-width: 767.8px) {
+@media only screen and (max-width: 977.8px) {
     .Game-container {
+        flex-direction: column;
         align-items: center;
     }
+}
 
-    .Game-board {
-        /* width: 95%; */
-        width: 20%;
+@media only screen and (max-width: 767.8px) {
+    .Game-ships-container-horizontal, .Game-ships-container-vertical {
+        width: 90%;
     }
 
     .Profile-container {

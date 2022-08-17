@@ -9,9 +9,9 @@ import { FontAwesomeIcon }               from '@fortawesome/react-fontawesome';
 import { faUser, faEnvelope, 
         faCircle, faMagnifyingGlass}     from '@fortawesome/free-solid-svg-icons';
 
-import Notification                      from './Notification';
 import CollapseComponent                 from './CollapseComponent';      
 import validateEmail                     from '../../utils/validateEmail';
+import Notification                      from './Notification';
 import { friends_data, users_data, 
         games_data }                     from '../../utils/mockedData';
 
@@ -20,7 +20,6 @@ function Profile(props) {
         e.preventDefault();
 
         // const { search } = document.forms[3];
-
     }
 
     const tables = {
@@ -194,10 +193,22 @@ function Profile(props) {
         )
     };
 
-    const [error_messages, setErrorMessages] = useState([]);
-    const [is_submitted,   setIsSubmitted  ] = useState(false);
-    const [table_content,  setTableContent ] = useState(tables.friends);
+    const [error_messages,      setErrorMessages     ] = useState([]);
+    const [is_submitted,        setIsSubmitted       ] = useState(false);
+    const [table_content,       setTableContent      ] = useState(tables.friends);
+    const [notifications_count, setNotificationsCount] = useState(props.notifications_count);
     
+    const getNotifications = () => {
+        const notifications_types = ['invite-friend', 'invite-game', 'delete-friend', 'decline-game'];
+        var notifications_arr     = [];
+
+        for (let i = 0; i < notifications_count; ++i) {
+            notifications_arr.push(<Notification type={notifications_types[Math.floor(Math.random() * notifications_types.length)]} key={'notification_' + (i + 1)} onClick={() => setNotificationsCount(notifications_count => notifications_count - 1)}/>);
+        }
+
+        return notifications_arr;
+    }
+
     const database = [
         {
             email:    'user1@mail.com',
@@ -366,20 +377,20 @@ function Profile(props) {
                         </div>
                     </div>
                     <div className='p-3'>
-                        <CollapseComponent aria_controls='notifications-collapse' button_text='Powiadomienia' notifications_count={props.notifications_count} button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
-                            <div className='Profile-notification-container mx-2'>
-                                <Notification type='invite-friend' />
-                                <Notification type='invite-game' />
-                                <Notification type='delete-friend' />
-                                <Notification type='decline-game' />
-                                <Notification type='invite-friend' />
-                                <Notification type='invite-game' />
-                                <Notification type='delete-friend' />
-                                <Notification type='decline-game' />
-                            </div>
-                            {/* <span className='text-muted ps-2'>Brak powiadomień</span> */}
+                        <CollapseComponent aria_controls='notifications-collapse' button_text='Powiadomienia' notifications_count={notifications_count} button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
+                            {
+                                notifications_count > 0 ?
+                                <div className='Profile-notification-container mx-2'>
+                                    {
+                                        getNotifications().map(notification => {
+                                            return (notification);
+                                        })
+                                    }
+                                </div> :
+                                <span className='text-muted ps-2'>Brak powiadomień</span>
+                            }
                         </CollapseComponent>
-                        <CollapseComponent aria_controls='change-uname-collapse' button_text='Zmień nazwę użytkownika' button_className='w-100 mb-3 rounded-0' collapse_className='mb-3'>
+                        <CollapseComponent aria_controls='change-uname-collapse' button_text='Zmień nazwę użytkownika' button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
                             <form onSubmit={handleSubmitUname}>
                                 <div className='p-2 d-flex flex-row Profile-change-data-container'>
                                     <input type='text' className='Profile-change-data-input px-2' placeholder='Wprowadź nową nazwę użytkownika' name='uname' />           
@@ -389,7 +400,7 @@ function Profile(props) {
                                 {renderErrorMessage('uname_taken')}
                             </form>
                         </CollapseComponent>
-                        <CollapseComponent aria_controls='change-email-collapse' button_text='Zmień adres e-mail' button_className='w-100 mb-3 rounded-0' collapse_className='mb-3'>
+                        <CollapseComponent aria_controls='change-email-collapse' button_text='Zmień adres e-mail' button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
                             <form onSubmit={handleSubmitEmail}>
                                 <div className='p-2 d-flex flex-row Profile-change-data-container'>
                                     <input type='text' className='Profile-change-data-input px-2' placeholder='Wprowadź nowy adres e-mail' name='email' />           
@@ -400,7 +411,7 @@ function Profile(props) {
                                 {renderErrorMessage('wrong_email')}
                             </form>
                         </CollapseComponent>
-                        <CollapseComponent aria_controls='change-pass-collapse'  button_text='Zmień hasło' button_className='w-100 mb-3 rounded-0' collapse_className='mb-3'>
+                        <CollapseComponent aria_controls='change-pass-collapse'  button_text='Zmień hasło' button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
                             <form onSubmit={handleSubmitPass}>
                                 <div className='d-flex flex-column'>
                                     <div className='p-2 d-flex flex-row Profile-change-data-container'>

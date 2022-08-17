@@ -1,4 +1,4 @@
-import React                   from 'react';
+import React, { useState }     from 'react';
 import { Tooltip, IconButton } from '@mui/material';
 import DoneIcon                from '@mui/icons-material/Done';
 import ClearIcon               from '@mui/icons-material/Clear';
@@ -22,12 +22,12 @@ function Notification(props) {
                     </div>
                     <div className='d-flex flex-row justify-content-start'>
                         <Tooltip title='Akceptuj' placement='top'>
-                            <IconButton aria-label='invite-accept' size='small' color='success' className='p-1'>
+                            <IconButton aria-label='invite-accept' size='small' color='success' className='p-1' onClick={props.onClick}>
                                 <DoneIcon fontSize='small'/>
                             </IconButton>
                         </Tooltip>
                         <Tooltip title='Odrzuć' placement='top'>
-                            <IconButton aria-label='invite-decline' size='small' color='error' className='p-1'>
+                            <IconButton aria-label='invite-decline' size='small' color='error' className='p-1' onClick={props.onClick}>
                                 <ClearIcon fontSize='small'/>
                             </IconButton>
                         </Tooltip>
@@ -41,12 +41,12 @@ function Notification(props) {
                     </div>
                     <div className='d-flex flex-row justify-content-start'>
                         <Tooltip title='Akceptuj' placement='top'>
-                            <IconButton aria-label='game-accept' size='small' color='success' className='p-1'>
+                            <IconButton aria-label='game-accept' size='small' color='success' className='p-1' onClick={props.onClick}>
                                 <DoneIcon fontSize='small'/>
                             </IconButton>
                         </Tooltip>
                         <Tooltip title='Odrzuć' placement='top'>
-                            <IconButton aria-label='game-decline' size='small' color='error' className='p-1'>
+                            <IconButton aria-label='game-decline' size='small' color='error' className='p-1' onClick={props.onClick}>
                                 <ClearIcon fontSize='small'/>
                             </IconButton>
                         </Tooltip>
@@ -60,7 +60,7 @@ function Notification(props) {
                     </div>
                     <div className='d-flex flex-row justify-content-start'>
                         <Tooltip title='Ok' placement='top'>
-                            <IconButton aria-label='invite-accept' size='small' color='success' className='p-1'>
+                            <IconButton aria-label='invite-accept' size='small' color='success' className='p-1' onClick={props.onClick}>
                                 <DoneIcon fontSize='small'/>
                             </IconButton>
                         </Tooltip>
@@ -74,7 +74,7 @@ function Notification(props) {
                     </div>
                     <div className='d-flex flex-row justify-content-start'>
                         <Tooltip title='Ok' placement='top'>
-                            <IconButton aria-label='invite-accept' size='small' color='success' className='p-1'>
+                            <IconButton aria-label='invite-accept' size='small' color='success' className='p-1' onClick={props.onClick}>
                                 <DoneIcon fontSize='small'/>
                             </IconButton>
                         </Tooltip>

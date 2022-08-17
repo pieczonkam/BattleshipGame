@@ -4,7 +4,7 @@ import { Link }                                              from 'react-router-
 import { FontAwesomeIcon }                                   from '@fortawesome/react-fontawesome';
 import { faUserPlus, faArrowRightToBracket, faShip, faUser } from '@fortawesome/free-solid-svg-icons';
 
-function NavigationBar(props) {
+function NavigationBar() {
     return (
         <Navbar collapseOnSelect expand='md' bg='dark' variant='dark' className='px-2'>
             <Navbar.Brand href='/'>Statki Online</Navbar.Brand>
@@ -30,10 +30,6 @@ function NavigationBar(props) {
                     <NavLink  eventKey='6' as={Link} to='/profile' className='mx-1'>
                         <FontAwesomeIcon icon={faUser} fixedWidth/>
                         <span>&nbsp;&nbsp;Profil</span>
-                        {
-                            props.notifications_count && props.notifications_count > 0 ?
-                            <div className='notification bg-danger'>{props.notifications_count}</div> : ''
-                        }
                     </NavLink>
                 </Nav>
             </Navbar.Collapse>     

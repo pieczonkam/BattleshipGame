@@ -6,7 +6,6 @@ import App               from './App';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/main.css';
-import './styles/game.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
