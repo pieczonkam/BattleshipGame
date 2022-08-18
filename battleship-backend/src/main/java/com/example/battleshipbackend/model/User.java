@@ -2,6 +2,9 @@ package com.example.battleshipbackend.model;
 
 import javax.persistence.*;
 
+/**
+ * Klasa reprezentująca instancję User z tabeli users
+ */
 @Entity
 @Table(name = "users")
 public class User {

@@ -80,6 +80,11 @@ body {
     display: grid;
     grid-template: 1fr / 1fr;
     place-items: center;
+    border: 1px solid rgba(67, 67, 67);
+}
+
+.Game-board-b-outer {
+    border: 1px solid rgba(67, 67, 67);
 }
 
 .Game-board-a-outer > * {
@@ -97,7 +102,6 @@ body {
 
 .Game-board-title {
     font-size: 26px;
-    margin-left: 40px;
 }
 
 .Game-board-tile-text {
@@ -105,13 +109,31 @@ body {
     height: 40px;
     text-align: center;
     line-height: 40px;
+    background-color: rgb(152, 247, 250);
+    border: 1px solid rgba(67, 67, 67);
 }
 
-.Game-board-tile-bg {
+.Game-board-tile-bg-a, .Game-board-tile-bg-b {
     width: 40px;
     height: 40px;
-    background-color: aqua;
-    border: 1px solid black;
+    background-color: rgb(0, 247, 255);
+    border: 1px solid rgba(67, 67, 67);
+}
+
+.Game-board-tile-bg-b:hover {
+    background-color: rgb(44, 160, 163);
+    cursor: pointer;
+}
+
+.Game-board-tile-bg-b-clicked {
+    width: 40px;
+    height: 40px;
+    background-color: rgb(42, 104, 106);
+    border: 1px solid rgba(67, 67, 67);
+}
+
+.Game-board-tile-bg-b-clicked:hover{
+    cursor: not-allowed;
 }
 
 .Game-board-tile {
@@ -137,7 +159,7 @@ body {
 }
 
 .Game-ship {
-    margin: 5px;
+    margin: 4px;
     background-color: rgb(101, 101, 101);
     border: 2px solid rgb(45, 45, 45);
     border-radius: 50px;
@@ -149,6 +171,16 @@ body {
 .Game-ship:hover{
     background-color: rgb(66, 66, 66);
     border: 2px solid rgb(17, 17, 17);
+}
+
+.Game-ship-set {
+    margin: 4px;
+    background-color: rgb(101, 101, 101);
+    border: 2px solid rgb(45, 45, 45);
+    border-radius: 50px;
+    cursor: default;
+    display: inline-block;
+    z-index: 200;
 }
 
 .ship-1-horizontal {
@@ -239,7 +271,7 @@ body {
     width: 65%;
     margin: 20px;
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
-    max-height: 600px;
+    max-height: 550px;
 }
 
 .Profile-table-button-01 {
@@ -307,6 +339,11 @@ th, td {
     .Game-container {
         flex-direction: column;
         align-items: center;
+    }
+
+    .Game-board-a, .Game-board-b {
+        margin-left: 0;
+        margin-right: 0;
     }
 }
 

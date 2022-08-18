@@ -10,8 +10,9 @@ import { BOARD_SIZE }          from '../../utils/constants';
 import { prepareBoardMap }     from '../../utils/utils';
 
 function Game() {
-    const [ships_vertical, setShipsVertical] = useState(false);
-    const [board_map, setBoardMap]           = useState(prepareBoardMap(BOARD_SIZE));
+    const [ships_vertical, setShipsVertical]    = useState(false);
+    const [board_map, setBoardMap]              = useState(prepareBoardMap(BOARD_SIZE));
+    const [drag_over_update, setDragOverUpdate] = useState(true);
 
     const getBoard = type => {
         var board_tiles_arr = [];
@@ -21,7 +22,7 @@ function Game() {
             var board_tiles_row = [];
             for (let j = 0; j < BOARD_SIZE + 1; ++j) {
                 if (type === 'a') {
-                    board_tiles_row.push(<BoardTile type={type} x={i} y={j} key={'board-' + type + '-' + (i) + '-' + (j)} board_map={board_map} setBoardMap={setBoardMap}></BoardTile>)
+                    board_tiles_row.push(<BoardTile type={type} x={i} y={j} key={'board-' + type + '-' + (i) + '-' + (j)} board_map={board_map} setBoardMap={setBoardMap} drag_over_update={drag_over_update} setDragOverUpdate={setDragOverUpdate}></BoardTile>)
                 } else {
                     board_tiles_row.push(<BoardTile type={type} x={i} y={j} key={'board-' + type + '-' + (i) + '-' + (j)}></BoardTile>)
                 }
@@ -49,7 +50,9 @@ function Game() {
                     </div>
                     <div className='Game-board-b d-flex flex-column align-items-center text-bold'>
                         <span className='Game-board-title'>Statki przeciwnika</span>
-                        {getBoard('b')}                
+                        <div className='Game-board-b-outer'>
+                            {getBoard('b')}
+                        </div>
                     </div>
                 </div>
                 <div className='d-flex flex-row'>
