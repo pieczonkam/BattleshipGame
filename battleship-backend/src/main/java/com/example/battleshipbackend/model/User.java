@@ -10,18 +10,19 @@ import javax.persistence.*;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long user_id;
-
+    @Column(name = "username")
     private String username;
+    @Column(name = "email")
     private String email;
+    @Column(name = "password")
     private String password;
 
     public User() {
     }
 
-    public User(Long user_id, String username, String email, String password) {
-        this.user_id = user_id;
+    public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
@@ -53,5 +54,10 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @Override
+    public String toString() {
+        return "User [id=" + user_id + ", username=" + username + ", email=" + email + ", password=" + password + "]";
     }
 }

@@ -1,6 +1,7 @@
 import React, { useState }     from 'react';
 import { FontAwesomeIcon }     from '@fortawesome/react-fontawesome';
 import { faRotate }            from '@fortawesome/free-solid-svg-icons';
+import { Tooltip, Button }     from '@mui/material';
 
 import ShipsContainer          from './ShipsContainer';
 import Ship                    from './Ship';
@@ -36,7 +37,7 @@ function Game() {
 
     return (
             <div className='d-flex flex-column align-items-center'>
-                <div className='Game-container my-4'>
+                <div className='Game-container my-2'>
                     <div className='Game-board-a d-flex flex-column align-items-center text-bold'>
                         <span className='Game-board-title'>Twoje statki</span>
                         <div className='Game-board-a-outer'>
@@ -55,15 +56,24 @@ function Game() {
                         </div>
                     </div>
                 </div>
+                <span className='px-2 pt-2 pb-1'>
+                    <Tooltip title=
+                        'Przeciągnij statki z dolnego panelu na lewą planszę. Możesz obrócic statki w panelu klikając na przycisk "Obróć statki". Wciśnij start aby rozpocząć grę. Znajdź statki przeciwnika, klikając na pola na prawej planszy.'
+                    placement='top'>
+                        <Button>
+                            Jak grać?
+                        </Button>
+                    </Tooltip>
+                </span>
                 <div className='d-flex flex-row'>
-                    <button className='btn btn-primary mx-1 mt-5 px-5' onClick={() => console.log('Start!')}>
+                    <button className='btn btn-primary mx-1 px-5 rounded-0' onClick={() => console.log('Start!')}>
                         Start
                     </button>
-                    <button className='btn btn-primary mx-1 mt-5 px-3' onClick={() => setShipsVertical(!ships_vertical)}>
+                    <button className='btn btn-primary mx-1 px-3 rounded-0' onClick={() => setShipsVertical(!ships_vertical)}>
                         <FontAwesomeIcon icon={faRotate}/>
                         {' '}Obróć statki
                     </button>
-                    <button className='btn btn-primary mx-1 mt-5 px-5' onClick={() => window.location.reload(false)}>
+                    <button className='btn btn-primary mx-1 px-5 rounded-0' onClick={() => window.location.reload(false)}>
                         Reset
                     </button>
                 </div>

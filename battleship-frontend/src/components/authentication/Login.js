@@ -75,18 +75,18 @@ function Login() {
                         <h3 className='Auth-form-title'>Logowanie</h3>
                         <div className='form-group mt-3'>
                             <label className='Auth-form-label'>Adres e-mail</label>
-                            <input type='text' className='form-control mt-1' placeholder='Wprowadź adres e-mail' name='email' />
+                            <input type='text' className='form-control mt-1 rounded-0' placeholder='Wprowadź adres e-mail' name='email' />
                             {renderErrorMessage('email_missing')}
                             {renderErrorMessage('wrong_email')}              
                         </div>
                         <div className='form-group mt-3'>
                             <label className='Auth-form-label'>Hasło</label>
-                            <input type='password' className='form-control mt-1' placeholder='Wprowadź hasło' name='pass'/>
+                            <input type='password' className='form-control mt-1 rounded-0' placeholder='Wprowadź hasło' name='pass'/>
                             {renderErrorMessage('pass_missing')}
                             {renderErrorMessage('wrong_pass')}
                         </div>
-                        <div className='d-grid gap-2 mt-3'>
-                            <button type='submit' className='btn btn-primary'>
+                        <div className='d-grid gap-2 mt-4'>
+                            <button type='submit' className='btn btn-primary rounded-0'>
                                 Zaloguj się
                             </button>
                         </div>

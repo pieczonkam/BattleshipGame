@@ -35,4 +35,9 @@ public class UserService implements IUserService{
     public void deleteUser(Long id) {
         repository.deleteById(id);
     }
+
+    @Override
+    public User addUser(User user) {
+        return repository.save(user);
+    }
 }

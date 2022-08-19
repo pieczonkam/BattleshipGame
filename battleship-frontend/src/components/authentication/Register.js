@@ -104,31 +104,31 @@ function Register() {
                         <h3 className='Auth-form-title'>Rejestracja</h3>
                         <div className='form-group mt-3'>
                             <label className='Auth-form-label'>Adres e-mail</label>
-                            <input type='text' className='form-control mt-1' placeholder='Wprowadź adres e-mail' name='email' />
+                            <input type='text' className='form-control mt-1 rounded-0' placeholder='Wprowadź adres e-mail' name='email' />
                             {renderErrorMessage('email_missing')}
                             {renderErrorMessage('wrong_email')} 
                             {renderErrorMessage('email_taken')}            
                         </div>
                         <div className='form-group mt-3'>
                             <label className='Auth-form-label'>Nazwa użytkownika</label>
-                            <input type='text' className='form-control mt-1' placeholder='Wprowadź nazwę użytkownika' name='uname' />
+                            <input type='text' className='form-control mt-1 rounded-0' placeholder='Wprowadź nazwę użytkownika' name='uname' />
                             {renderErrorMessage('uname_missing')}
                             {renderErrorMessage('uname_taken')}           
                         </div>
                         <div className='form-group mt-3'>
                             <label className='Auth-form-label'>Hasło</label>
-                            <input type='password' className='form-control mt-1' placeholder='Wprowadź hasło' name='pass_01'/>
+                            <input type='password' className='form-control mt-1 rounded-0' placeholder='Wprowadź hasło' name='pass_01'/>
                             {renderErrorMessage('pass_01_missing')}
                             {renderErrorMessage('pass_too_short')}
                         </div>
                         <div className='form-group mt-3'>
                             <label className='Auth-form-label'>Powtórz hasło</label>
-                            <input type='password' className='form-control mt-1' placeholder='Wprowadź hasło' name='pass_02'/>
+                            <input type='password' className='form-control mt-1 rounded-0' placeholder='Wprowadź hasło' name='pass_02'/>
                             {renderErrorMessage('pass_02_missing')}
                             {renderErrorMessage('pass_diff')}
                         </div>
-                        <div className='d-grid gap-2 mt-3'>
-                            <button type='submit' className='btn btn-primary'>
+                        <div className='d-grid gap-2 mt-4'>
+                            <button type='submit' className='btn btn-primary rounded-0'>
                                 Zarejestruj się
                             </button>
                         </div>

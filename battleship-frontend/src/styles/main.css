@@ -80,11 +80,15 @@ body {
     display: grid;
     grid-template: 1fr / 1fr;
     place-items: center;
+    background-color: rgba(67, 67, 67);
     border: 1px solid rgba(67, 67, 67);
 }
 
 .Game-board-b-outer {
+    background-color: rgba(67, 67, 67);
     border: 1px solid rgba(67, 67, 67);
+    margin: 0;
+    padding: 0;
 }
 
 .Game-board-a-outer > * {
@@ -93,7 +97,7 @@ body {
 }
 
 .Game-board-a-inner-bottom {
-    z-index: -100;
+    z-index: 5;
 }
 
 .Game-board-a-inner-top {
@@ -125,14 +129,21 @@ body {
     cursor: pointer;
 }
 
-.Game-board-tile-bg-b-clicked {
+.Game-board-tile-bg-b-clicked-hit, .Game-board-tile-bg-b-clicked-miss {
     width: 40px;
     height: 40px;
-    background-color: rgb(42, 104, 106);
     border: 1px solid rgba(67, 67, 67);
 }
 
-.Game-board-tile-bg-b-clicked:hover{
+.Game-board-tile-bg-b-clicked-hit {
+    background-color: rgb(214, 83, 83);
+}
+
+.Game-board-tile-bg-b-clicked-miss {
+    background-color: rgb(42, 104, 106);
+}
+
+.Game-board-tile-bg-b-clicked-hit:hover, .Game-board-tile-bg-b-clicked-miss:hover {
     cursor: not-allowed;
 }
 

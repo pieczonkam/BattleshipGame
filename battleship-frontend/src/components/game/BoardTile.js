@@ -96,10 +96,8 @@ function BoardTile(props) {
                 let row_nmb = ship_tiles[i].split('-')[3];
                 let col_nmb = ship_tiles[i].split('-')[4];
     
-                if (board_map[row_nmb - 1][col_nmb - 1] === 2) {
-                    document.getElementById(ship_tiles[i]).style.backgroundColor = 'rgb(230, 0, 0)';
-                } else if (board_map[row_nmb - 1][col_nmb - 1] === 1) {
-                    document.getElementById(ship_tiles[i]).style.backgroundColor = 'rgb(214, 83, 83)';
+                if (board_map[row_nmb - 1][col_nmb - 1] === 1 || board_map[row_nmb - 1][col_nmb - 1] === 2) {
+                    document.getElementById(ship_tiles[i]).style.backgroundColor ='rgb(214, 83, 83)';
                 } else {
                     document.getElementById(ship_tiles[i]).style.backgroundColor = 'rgb(44, 160, 163)';
                 }
@@ -114,7 +112,7 @@ function BoardTile(props) {
     const drop = e => {
         e.preventDefault();
 
-        if (e.target.classList.contains('Game-ship')) {
+        if (e.target.classList.contains('Game-ship') || e.target.classList.contains('Game-ship-set')) {
             e.target = e.target.parentNode;
         }
 
@@ -147,7 +145,7 @@ function BoardTile(props) {
         e.preventDefault();
 
         if (props.drag_over_update) {
-            if (e.target.classList.contains('Game-ship')) {
+            if (e.target.classList.contains('Game-ship') || e.target.classList.contains('Game-ship-set')) {
                 e.target = e.target.parentNode;
             }
     
@@ -166,7 +164,7 @@ function BoardTile(props) {
     const dragLeave = e => {
         e.preventDefault();
 
-        if (e.target.classList.contains('Game-ship')) {
+        if (e.target.classList.contains('Game-ship') || e.target.classList.contains('Game-ship-set')) {
             e.target = e.target.parentNode;
         }
 
@@ -182,8 +180,13 @@ function BoardTile(props) {
     }
 
     const onBoardBClick = e => {
-        if (!e.target.classList.contains('Game-board-tile-bg-b-clicked')) {
-            e.target.className = 'Game-board-tile-bg-b-clicked';
+        if (!(e.target.classList.contains('Game-board-tile-bg-b-clicked-hit') || e.target.classList.contains('Game-board-tile-bg-b-clicked-miss'))) {
+            var nmb = Math.random();
+            if (nmb > 0.7) {
+                e.target.className = 'Game-board-tile-bg-b-clicked-hit';    
+            } else {
+                e.target.className = 'Game-board-tile-bg-b-clicked-miss';
+            }
         }
     }
 
