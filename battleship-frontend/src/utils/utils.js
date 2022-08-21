@@ -1,11 +1,11 @@
-function getRandomInt(min, max) {
+const getRandomInt = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
 
     return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function prepareBoardMap(board_size) {
+const prepareBoardMap = (board_size) => {
     var board_map = [];
 
     for (let i = 0; i < board_size; ++i) {
@@ -20,5 +20,14 @@ function prepareBoardMap(board_size) {
     return board_map;
 }
 
-export { getRandomInt, prepareBoardMap };
+const validateEmail = (email) => {
+    let email_valid = String(email)
+          .toLowerCase()
+          .match(
+              /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          ) === null ? false : true;
+    return email_valid;
+}
+
+export { getRandomInt, prepareBoardMap, validateEmail };
 

@@ -9,35 +9,58 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService implements IUserService{
+public class UserService implements IUserService {
 
     @Autowired
-    private UserRepository repository;
+    private UserRepository userRepository;
 
-    @Autowired
-    public Long count() {
-        return repository.count();
+    @Override
+    public List<User> getUsers() {
+        return (List<User>) userRepository.findAll();
     }
 
     @Override
-    public List<User> findAll() {
-        var users = (List<User>) repository.findAll();
+    public User getUserById(Long id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            return user.get();
+        }
 
-        return users;
-    }
-
-    @Override
-    public Optional<User> findUser(Long id) {
-        return repository.findById(id);
-    }
-
-    @Override
-    public void deleteUser(Long id) {
-        repository.deleteById(id);
+        return null;
     }
 
     @Override
     public User addUser(User user) {
-        return repository.save(user);
+        return userRepository.save(user);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public User getUserByUsername(String username) {
+        return userRepository.getUserByUsername(username);
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        return userRepository.getUserByEmail(email);
+    }
+
+    @Override
+    public List<User> getDifferentUsers(Long id) {
+        return userRepository.getDifferentUsers(id);
+    }
+
+    @Override
+    public Long getUserIdByEmail(String email) {
+        return userRepository.getUserIdByEmail(email);
+    }
+
+    @Override
+    public List<User> getUsersByPattern(String pattern, Long id) {
+        return userRepository.getUsersByPattern(pattern, id);
     }
 }

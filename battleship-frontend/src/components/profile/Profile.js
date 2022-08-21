@@ -1,21 +1,23 @@
-import { React, useState }               from 'react';
-import { Navigate }                      from 'react-router-dom';
-import { Tooltip, IconButton }           from '@mui/material';
-import ClearIcon                         from '@mui/icons-material/Clear'
-import PlayArrow                         from '@mui/icons-material/PlayArrow';
-import AddIcon                           from '@mui/icons-material/Add';
-import RemoveIcon                        from '@mui/icons-material/Remove';
-import { FontAwesomeIcon }               from '@fortawesome/react-fontawesome';
+import { React, useEffect, useState }         from 'react';
+import { Tooltip, IconButton }                from '@mui/material';
+import ClearIcon                              from '@mui/icons-material/Clear'
+import PlayArrow                              from '@mui/icons-material/PlayArrow';
+import AddIcon                                from '@mui/icons-material/Add';
+import { FontAwesomeIcon }                    from '@fortawesome/react-fontawesome';
 import { faUser, faEnvelope, 
-        faCircle, faMagnifyingGlass}     from '@fortawesome/free-solid-svg-icons';
+          faMagnifyingGlass}                  from '@fortawesome/free-solid-svg-icons';
 
-import CollapseComponent                 from './CollapseComponent';      
-import validateEmail                     from '../../utils/validateEmail';
-import Notification                      from './Notification';
-import { friends_data, users_data, 
-        games_data }                     from '../../utils/mockedData';
+import CollapseComponent                      from './CollapseComponent';      
+import { validateEmail }                      from '../../utils/utils';
+import Notification                           from './Notification';
+import { friends_data, users_data }           from '../../utils/mockedData';
+import { changeEmailRequest, changeUsernameRequest, userDataRequest, userGamesRequest }  from '../../utils/requestsAPI';
+import { logOut }                             from '../../utils/utilsAPI';
 
 function Profile(props) {
+    const [user_data, setUserData] = useState('');
+    const [user_games, setUserGames] = useState([]);
+
     const handleSubmitSearch = e => {
         e.preventDefault();
 
@@ -34,7 +36,6 @@ function Profile(props) {
                                     <th scope='col'></th>
                                     <th scope='col'>Nazwa użytkownika</th>
                                     <th scope='col'>Adres e-mail</th>
-                                    <th scope='col'>Status</th>
                                     <th scope='col' colSpan='2'></th>
                                 </tr>
                             </thead>
@@ -45,42 +46,19 @@ function Profile(props) {
                                             <th scope='row'>{index + 1}</th>
                                             <td>{friend[0]}</td>
                                             <td>{friend[1]}</td>
-                                            <td>
-                                                {
-                                                    friend[2] === 'Online' ?
-                                                    <Tooltip title='Online' placement='top'>
-                                                        <FontAwesomeIcon icon={faCircle} className='text-success' size='xs' />
-                                                    </Tooltip> :
-                                                    <Tooltip title='Offline' placement='top'>
-                                                        <FontAwesomeIcon icon={faCircle} className='text-danger' size='xs' />                                            
-                                                    </Tooltip>
-                                                }
-                                            </td>
                                             <td>                                            
-                                                {
-                                                    friend[2] === 'Online' ? 
-                                                    <Tooltip title='Zaproś do gry' placement='top'>
-                                                        <IconButton aria-label='invite' size='small' color='success' className='p-0'>
-                                                            <PlayArrow fontSize='small'/>
-                                                        </IconButton>
-                                                    </Tooltip> :
-                                                    <IconButton aria-label='invite' size='small' color='success' className='p-0' disabled>
+                                                <Tooltip title='Zaproś do gry' placement='top'>
+                                                    <IconButton aria-label='invite' size='small' color='success' className='p-0'>
                                                         <PlayArrow fontSize='small'/>
                                                     </IconButton>
-                                                }
+                                                </Tooltip> 
                                             </td>
                                             <td>
-                                                {
-                                                    friend[2] === 'Online' ?
-                                                    <Tooltip title='Usuń ze znajomych' placement='top'>
-                                                        <IconButton aria-label='delete' size='small' color='error' className='p-0'>
-                                                            <ClearIcon fontSize='small'/>
-                                                        </IconButton>
-                                                    </Tooltip> :
-                                                    <IconButton aria-label='delete' size='small' color='error' className='p-0' disabled>
+                                                <Tooltip title='Usuń ze znajomych' placement='top'>
+                                                    <IconButton aria-label='delete' size='small' color='error' className='p-0'>
                                                         <ClearIcon fontSize='small'/>
                                                     </IconButton>
-                                                }                                    
+                                                </Tooltip>                                    
                                             </td>
                                         </tr>
 
@@ -127,19 +105,11 @@ function Profile(props) {
                                                 <td>{user[0]}</td>
                                                 <td>{user[1]}</td>    
                                                 <td>
-                                                    {
-                                                        user[2] ?
-                                                        <Tooltip title='Anuluj zaproszenie' placement='top'>
-                                                            <IconButton aria-label='invite-cancel' size='small' color='warning' className='p-0'>
-                                                                <RemoveIcon fontSize='small'/>
-                                                            </IconButton>
-                                                        </Tooltip> :
-                                                        <Tooltip title='Zaproś do znajomych' placement='top'>
-                                                            <IconButton aria-label='invite' size='small' color='success' className='p-0'>
-                                                                <AddIcon fontSize='small'/>
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    }
+                                                    <Tooltip title='Zaproś do znajomych' placement='top'>
+                                                        <IconButton aria-label='invite' size='small' color='success' className='p-0'>
+                                                            <AddIcon fontSize='small'/>
+                                                        </IconButton>
+                                                    </Tooltip>
                                                 </td>                    
                                             </tr>
                                         );
@@ -156,30 +126,32 @@ function Profile(props) {
         history: (
             <>
                 {
-                    games_data.length > 0 ?
+                    user_games.length > 0 ?
                     <div className='my-2 Profile-table'>
                         <table className='table table-striped table-hover'>
                             <thead>
                                 <tr>
                                     <th scope='col'></th>
-                                    <th scope='col'>Nazwa użytkownika</th>
-                                    <th scope='col'>Adres e-mail</th>
+                                    <th scope='col'>Przeciwnik</th>
                                     <th scope='col'>Data</th>
                                     <th scope='col'>Wynik</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {games_data.map((game, index) => {
+                                {user_games.map((game, index) => {
                                     return (
                                         <tr key={'game-' + (index + 1)}>
                                             <th scope='row'>{index + 1}</th>
-                                            <td>{game[0]}</td>
-                                            <td>{game[1]}</td>
-                                            <td>{game[2]}</td>
+                                            <td>{game.user1}</td>
+                                            <td>
+                                                {
+                                                    game.gameDate.split('T')[0] + ' ' + game.gameDate.split('T')[1].split('.')[0]
+                                                }
+                                            </td>
                                             {
-                                                game[3] === 'Wygrana' ?
-                                                <td className='text-success Profile-game-result-text'>{game[3]}</td> :
-                                                <td className='text-danger Profile-game-result-text'>{game[3]}</td>
+                                                game.winner === 'Wygrana' ?
+                                                <td className='text-success Profile-game-result-text'>{game.winner}</td> :
+                                                <td className='text-danger Profile-game-result-text'>{game.winner}</td>
                                             }
                                         </tr>
                                     );
@@ -194,10 +166,9 @@ function Profile(props) {
     };
 
     const [error_messages,      setErrorMessages     ] = useState([]);
-    const [is_submitted,        setIsSubmitted       ] = useState(false);
     const [table_content,       setTableContent      ] = useState(tables.friends);
     const [notifications_count, setNotificationsCount] = useState(props.notifications_count);
-    
+
     const getNotifications = () => {
         const notifications_types = ['invite-friend', 'invite-game', 'delete-friend', 'decline-game'];
         var notifications_arr     = [];
@@ -232,49 +203,63 @@ function Profile(props) {
         wrong_email:     'Podano błędny adres e-mail',
         wrong_pass:      'Podano błędne hasło',
         pass_too_short:  'Podane hasło jest za krótkie (min. 8 znaków)',
-        pass_idencital:  'Nowe hasło musi inne od obecnego'
+        pass_idencital:  'Nowe hasło musi inne od obecnego',
+        server_error:    'Coś poszło nie tak, spróbuj ponownie'
     };
-    
-    const handleSubmit = (e, type) => {
+
+    const handleSubmit = async (e, type) => {
         e.preventDefault();
 
         var error_messages_arr = [];
         switch (type) {
             case 'uname':
-                var { uname }      = document.forms[0];
-                const uname_exists = database.find(user => user.uname === uname.value);
-                var uname_valid    = true;
+                var { uname } = document.forms[0];
 
                 if (uname.value.length === 0) {
-                    uname_valid = false;
                     error_messages_arr.push({ name: 'uname_missing', message: errors.uname_missing });
-                } else if (uname_exists) {
-                    uname_valid = false;
-                    error_messages_arr.push({ name: 'uname_taken', message: errors.uname_taken });
+                } else {
+                    const status = await changeUsernameRequest(localStorage.getItem('jwt'), {
+                        username: uname.value
+                    });
+
+                    if (status === 401) {
+                        logOut();
+                    } else if (status === 409) {
+                        error_messages_arr.push({ name: 'uname_taken', message: errors.uname_taken });
+                    } else if (status === 200) {
+                        window.location.reload(false);
+                    } else {
+                        error_messages_arr.push({ name: 'server_error', message: errors.server_error });
+                    }
                 }
 
                 setErrorMessages(error_messages_arr);
-                setIsSubmitted(uname_valid);
                 break;
             
             case 'email':
-                var { email }      = document.forms[1];
-                const email_exists = database.find(user => user.email === email.value);
-                var email_valid    = true;
+                var { email } = document.forms[1];
 
                 if (email.value.length === 0) {
-                    email_valid = false;
                     error_messages_arr.push({ name: 'email_missing', message: errors.email_missing });
                 } else if (!validateEmail(email.value)) {
-                    email_valid = false;
                     error_messages_arr.push({ name: 'wrong_email', message: errors.wrong_email });
-                } else if (email_exists) {
-                    email_valid = false;
-                    error_messages_arr.push({ name: 'email_taken', message: errors.email_taken });
+                } else {
+                    const status = await changeEmailRequest(localStorage.getItem('jwt'), {
+                        email: email.value
+                    });
+
+                    if (status === 401) {
+                        logOut();
+                    } else if (status === 409) {
+                        error_messages_arr.push({ name: 'email_taken', message: errors.email_taken });
+                    } else if (status === 200) {
+                        window.location.reload(false);
+                    } else {
+                        error_messages_arr.push({ name: 'server_error', message: errors.server_error });
+                    }
                 }
 
                 setErrorMessages(error_messages_arr);
-                setIsSubmitted(email_valid);
                 break;
 
             case 'pass':
@@ -284,7 +269,6 @@ function Profile(props) {
                 var { pass_01, pass_02 } = document.forms[2];
                 var pass_correct         = database.find(user => user.uname === current_uname && user.email === current_email && user.password === pass_01.value);
                 var pass_valid           = true;
-
 
                 if (pass_01.value.length === 0) {
                     pass_valid = false;
@@ -308,7 +292,6 @@ function Profile(props) {
                 }
 
                 setErrorMessages(error_messages_arr);
-                setIsSubmitted(pass_valid);
                 break;
 
             default:
@@ -328,12 +311,20 @@ function Profile(props) {
         handleSubmit(e, 'pass');
     }
 
-    const renderErrorMessage = name => {
+    const renderErrorMessage = (name, type = 'default') => {
         const error_message = error_messages.find(em => em.name === name);
 
         if (error_message) {
+            if (type === 'error_main') {
+                document.forms[0].reset();
+                document.forms[1].reset();
+                document.forms[2].reset();
+            }
+
             return (
-                <label className='px-2 Profile-change-data-error text-danger'>{error_message.message}</label>
+                type === 'default' ?
+                <label className='px-2 Profile-change-data-error text-danger'>{error_message.message}</label> :
+                <label className='px-2 pt-3 Profile-change-data-error-main text-danger'>{error_message.message}</label>
             );
         }
     };
@@ -361,87 +352,115 @@ function Profile(props) {
         }
     }
 
-    return (
-        <>
-            {is_submitted ? <Navigate to='/' replace /> :
-            <div className='Profile-container my-4 d-flex flex-column flex-md-row'>
-                <div className='Profile-user-panel d-flex flex-column'>
-                    <div className='Profile-user-info d-flex flex-column p-3'>
+    useEffect(() => {
+        const getUserData = async () => {
+            const [ response, status ] = await userDataRequest(localStorage.getItem('jwt'));
+
+            if (status === 200) {
+                setUserData(
+                    <>
                         <div>
                             <FontAwesomeIcon icon={faUser} fixedWidth/>
-                            <span>&nbsp;&nbsp;User123</span>
+                            <span>&nbsp;&nbsp;{response.username}</span>
                         </div>
                         <div>
                             <FontAwesomeIcon icon={faEnvelope} fixedWidth/>       
-                            <span>&nbsp;&nbsp;User123@mail.com</span>
+                            <span>&nbsp;&nbsp;{response.email}</span>
                         </div>
-                    </div>
-                    <div className='p-3'>
-                        <CollapseComponent aria_controls='notifications-collapse' button_text='Powiadomienia' notifications_count={notifications_count} button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
-                            {
-                                notifications_count > 0 ?
-                                <div className='Profile-notification-container mx-2'>
-                                    {
-                                        getNotifications().map(notification => {
-                                            return (notification);
-                                        })
-                                    }
-                                </div> :
-                                <span className='text-muted ps-2'>Brak powiadomień</span>
-                            }
-                        </CollapseComponent>
-                        <CollapseComponent aria_controls='change-uname-collapse' button_text='Zmień nazwę użytkownika' button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
-                            <form onSubmit={handleSubmitUname}>
-                                <div className='p-2 d-flex flex-row Profile-change-data-container'>
-                                    <input type='text' className='Profile-change-data-input px-2' placeholder='Wprowadź nową nazwę użytkownika' name='uname' />           
-                                    <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm rounded-0'>Dalej</button>
-                                </div>
-                                {renderErrorMessage('uname_missing')}
-                                {renderErrorMessage('uname_taken')}
-                            </form>
-                        </CollapseComponent>
-                        <CollapseComponent aria_controls='change-email-collapse' button_text='Zmień adres e-mail' button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
-                            <form onSubmit={handleSubmitEmail}>
-                                <div className='p-2 d-flex flex-row Profile-change-data-container'>
-                                    <input type='text' className='Profile-change-data-input px-2' placeholder='Wprowadź nowy adres e-mail' name='email' />           
-                                    <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm rounded-0'>Dalej</button>
-                                </div>
-                                {renderErrorMessage('email_missing')}
-                                {renderErrorMessage('email_taken')}
-                                {renderErrorMessage('wrong_email')}
-                            </form>
-                        </CollapseComponent>
-                        <CollapseComponent aria_controls='change-pass-collapse'  button_text='Zmień hasło' button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
-                            <form onSubmit={handleSubmitPass}>
-                                <div className='d-flex flex-column'>
-                                    <div className='p-2 d-flex flex-row Profile-change-data-container'>
-                                        <input type='password' className='Profile-change-data-input px-2' placeholder='Wprowadź obecne hasło' name='pass_01' />
-                                        <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm disabled invisible rounded-0'>Dalej</button>
-                                    </div>
-                                    {renderErrorMessage('pass_01_missing')}
-                                    {renderErrorMessage('wrong_pass')}
-                                    <div className='p-2 d-flex flex-row Profile-change-data-container'>
-                                        <input type='password' className='Profile-change-data-input px-2' placeholder='Wprowadź nowe hasło' name='pass_02' />
-                                        <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm rounded-0'>Dalej</button>
-                                    </div>
-                                    {renderErrorMessage('pass_02_missing')}
-                                    {renderErrorMessage('pass_too_short')}
-                                    {renderErrorMessage('pass_identical')}
-                                </div>
-                            </form>
-                        </CollapseComponent>
-                    </div>
-                </div>            
-                <div className='Profile-table-container d-flex flex-column'>
-                    <div className='d-flex flex-row'>
-                        <button className='btn btn-primary btn-lg Profile-table-button-01' onClick={() => switchTableContent('friends')}>Twoi znajomi </button>
-                        <button className='btn btn-primary btn-lg Profile-table-button-02' onClick={() => switchTableContent('search')} >Szukaj osób  </button>
-                        <button className='btn btn-primary btn-lg Profile-table-button-03' onClick={() => switchTableContent('history')}>Historia gier</button>
-                    </div>
-                    {table_content}
+                    </>
+                );
+            } else {
+                logOut();
+            }
+        }
+
+        const getUserGames = async () => {
+            const [ response, status ] = await userGamesRequest(localStorage.getItem('jwt'));
+
+            if (status === 200) {
+                setUserGames(response);
+            } else {
+                logOut();
+            }
+        }
+
+        getUserData();
+        getUserGames();
+
+    }, [])
+
+    return (
+        <div className='Profile-container my-4 d-flex flex-column flex-md-row'>
+            <div className='Profile-user-panel d-flex flex-column'>
+                <div className='Profile-user-info d-flex flex-column p-3'>
+                    { user_data }
+                    { renderErrorMessage('server_error', 'error_main') }
                 </div>
-            </div>}
-        </>
+                <div className='p-3'>
+                    <CollapseComponent aria_controls='notifications-collapse' button_text='Powiadomienia' notifications_count={notifications_count} button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
+                        {
+                            notifications_count > 0 ?
+                            <div className='Profile-notification-container mx-2'>
+                                {
+                                    getNotifications().map(notification => {
+                                        return (notification);
+                                    })
+                                }
+                            </div> :
+                            <span className='text-muted ps-2'>Brak powiadomień</span>
+                        }
+                    </CollapseComponent>
+                    <CollapseComponent aria_controls='change-uname-collapse' button_text='Zmień nazwę użytkownika' button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
+                        <form onSubmit={handleSubmitUname}>
+                            <div className='p-2 d-flex flex-row Profile-change-data-container'>
+                                <input type='text' className='Profile-change-data-input px-2' placeholder='Wprowadź nową nazwę użytkownika' name='uname' />           
+                                <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm rounded-0'>Dalej</button>
+                            </div>
+                            { renderErrorMessage('uname_missing') }
+                            { renderErrorMessage('uname_taken') }
+                        </form>
+                    </CollapseComponent>
+                    <CollapseComponent aria_controls='change-email-collapse' button_text='Zmień adres e-mail' button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
+                        <form onSubmit={handleSubmitEmail}>
+                            <div className='p-2 d-flex flex-row Profile-change-data-container'>
+                                <input type='text' className='Profile-change-data-input px-2' placeholder='Wprowadź nowy adres e-mail' name='email' />           
+                                <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm rounded-0'>Dalej</button>
+                            </div>
+                            { renderErrorMessage('email_missing') }
+                            { renderErrorMessage('email_taken') }
+                            { renderErrorMessage('wrong_email') }
+                        </form>
+                    </CollapseComponent>
+                    <CollapseComponent aria_controls='change-pass-collapse'  button_text='Zmień hasło' button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
+                        <form onSubmit={handleSubmitPass}>
+                            <div className='d-flex flex-column'>
+                                <div className='p-2 d-flex flex-row Profile-change-data-container'>
+                                    <input type='password' className='Profile-change-data-input px-2' placeholder='Wprowadź obecne hasło' name='pass_01' />
+                                    <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm disabled invisible rounded-0'>Dalej</button>
+                                </div>
+                                { renderErrorMessage('pass_01_missing') }
+                                { renderErrorMessage('wrong_pass') }
+                                <div className='p-2 d-flex flex-row Profile-change-data-container'>
+                                    <input type='password' className='Profile-change-data-input px-2' placeholder='Wprowadź nowe hasło' name='pass_02' />
+                                    <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm rounded-0'>Dalej</button>
+                                </div>
+                                { renderErrorMessage('pass_02_missing') }
+                                { renderErrorMessage('pass_too_short') }
+                                { renderErrorMessage('pass_identical') }
+                            </div>
+                        </form>
+                    </CollapseComponent>
+                </div>
+            </div>            
+            <div className='Profile-table-container d-flex flex-column'>
+                <div className='d-flex flex-row'>
+                    <button className='btn btn-primary btn-lg Profile-table-button-01' onClick={() => switchTableContent('friends')}>Twoi znajomi </button>
+                    <button className='btn btn-primary btn-lg Profile-table-button-02' onClick={() => switchTableContent('search')} >Szukaj osób  </button>
+                    <button className='btn btn-primary btn-lg Profile-table-button-03' onClick={() => switchTableContent('history')}>Historia gier</button>
+                </div>
+                {table_content}
+            </div>
+        </div>
     );
 }
 

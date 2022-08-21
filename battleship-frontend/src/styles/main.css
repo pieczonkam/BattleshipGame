@@ -54,6 +54,12 @@ body {
     font-weight: 600;
 }
 
+.Auth-form-success, .Auth-form-error-main {
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+}
+
 /* Game */
 
 .Game-container {    
@@ -274,6 +280,12 @@ body {
 .Profile-change-data-error {
     font-size: 12px;
     font-weight: 600;
+}
+
+.Profile-change-data-error-main {
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
 }
 
 .Profile-table-container {
