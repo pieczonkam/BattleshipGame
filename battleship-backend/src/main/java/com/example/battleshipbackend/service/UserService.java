@@ -15,11 +15,6 @@ public class UserService implements IUserService {
     private UserRepository userRepository;
 
     @Override
-    public List<User> getUsers() {
-        return (List<User>) userRepository.findAll();
-    }
-
-    @Override
     public User getUserById(Long id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isPresent()) {
@@ -35,11 +30,6 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
-    }
-
-    @Override
     public User getUserByUsername(String username) {
         return userRepository.getUserByUsername(username);
     }
@@ -50,17 +40,22 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<User> getDifferentUsers(Long id) {
-        return userRepository.getDifferentUsers(id);
-    }
-
-    @Override
     public Long getUserIdByEmail(String email) {
         return userRepository.getUserIdByEmail(email);
     }
 
     @Override
-    public List<User> getUsersByPattern(String pattern, Long id) {
-        return userRepository.getUsersByPattern(pattern, id);
+    public List<User> getPotentialFriendsById(Long id, String pattern) {
+        return userRepository.getPotentialFriendsById(id, pattern);
+    }
+
+    @Override
+    public List<User> getPotentialFriendsByIdAll(Long id) {
+        return userRepository.getPotentialFriendsByIdAll(id);
+    }
+
+    @Override
+    public List<User> getFriendsById(Long id) {
+        return userRepository.getFriendsById(id);
     }
 }

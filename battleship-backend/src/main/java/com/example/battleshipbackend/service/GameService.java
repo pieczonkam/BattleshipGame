@@ -5,6 +5,7 @@ import com.example.battleshipbackend.repository.GameRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.Tuple;
 import java.util.List;
 
 @Service
@@ -14,8 +15,8 @@ public class GameService implements IGameService {
     private GameRepository gameRepository;
 
     @Override
-    public List<Game> getGamesByUsername(String username) {
-        return gameRepository.getGamesByUsername(username);
+    public List<Tuple> getGamesByUserId(Long userId) {
+        return gameRepository.getGamesByUserId(userId);
     }
 
     @Override

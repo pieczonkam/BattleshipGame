@@ -4,6 +4,7 @@ import com.example.battleshipbackend.model.User;
 import com.example.battleshipbackend.service.IUserService;
 import com.example.battleshipbackend.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class AuthController {
 
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             if (passwordEncoder.matches(user.getPassword(), _user.getPassword())) {
-                return new ResponseEntity<>(JWTUtils.generateJWT(_user.getUserId(), _user.getEmail(), _user.getUsername()), HttpStatus.OK);
+                return new ResponseEntity<>(JWTUtils.generateJWT(_user.getUserId()), HttpStatus.OK);
             }
 
             return new ResponseEntity<>("Wrong password", HttpStatus.NOT_FOUND);
@@ -60,7 +61,7 @@ public class AuthController {
     }
 
     @GetMapping(path = "/jwtValidation", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> jwtValidation(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<Boolean> jwtValidation(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         try {
             String jwt = authorizationHeader.replace("Bearer ", "");
             if (JWTUtils.validateJWT(jwt)) {

@@ -1,7 +1,7 @@
 package com.example.battleshipbackend.model;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "games")
@@ -10,18 +10,18 @@ public class Game {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long gameId;
     @Column(name = "user_1")
-    private String user1;
+    private Long user1;
     @Column(name = "user_2")
-    private String user2;
+    private Long user2;
     @Column(name = "game_date")
-    private Date gameDate;
+    private Timestamp gameDate;
     @Column(name = "winner")
-    private String winner;
+    private Long winner;
 
     public Game() {
     }
 
-    public Game(String user1, String user2, Date gameDate, String winner) {
+    public Game(Long user1, Long user2, Timestamp gameDate, Long winner) {
         this.user1 = user1;
         this.user2 = user2;
         this.gameDate = gameDate;
@@ -32,41 +32,41 @@ public class Game {
         return gameId;
     }
 
-    public String getUser1() {
+    public Long getUser1() {
         return user1;
     }
 
-    public String getUser2() {
+    public Long getUser2() {
         return user2;
     }
 
-    public Date getGameDate() {
+    public Timestamp getGameDate() {
         return gameDate;
     }
 
-    public String getWinner() {
+    public Long getWinner() {
         return winner;
     }
 
-    public void setUser1(String user1) {
+    public void setUser1(Long user1) {
         this.user1 = user1;
     }
 
-    public void setUser2(String user2) {
+    public void setUser2(Long user2) {
         this.user2 = user2;
     }
 
-    public void setGameDate(Date gameDate) {
+    public void setGameDate(Timestamp gameDate) {
         this.gameDate = gameDate;
     }
 
-    public void setWinner(String winner) {
+    public void setWinner(Long winner) {
         this.winner = winner;
     }
 
     @Override
     public String toString() {
-        return "Notification [id=" + gameId + ", user1=" + user1 + ", user2=" + user2 + ", gameDate=" + gameDate + ", winner=" + winner + "]";
+        return "Game [id=" + gameId + ", user1=" + user1 + ", user2=" + user2 + ", gameDate=" + gameDate + ", winner=" + winner + "]";
     }
 }
 

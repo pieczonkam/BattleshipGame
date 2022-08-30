@@ -10,188 +10,37 @@ import { faUser, faEnvelope,
 import CollapseComponent                      from './CollapseComponent';      
 import { validateEmail }                      from '../../utils/utils';
 import Notification                           from './Notification';
-import { friends_data, users_data }           from '../../utils/mockedData';
-import { changeEmailRequest, changeUsernameRequest, userDataRequest, userGamesRequest }  from '../../utils/requestsAPI';
+import { addNotificationRequest, changeEmailRequest, 
+        changePasswordRequest, 
+        changeUsernameRequest, 
+        checkPasswordRequest, 
+        deleteFriendRequest, 
+        getNotificationsRequest, 
+        userDataRequest, 
+        userFriendsRequest, 
+        userGamesRequest, 
+        userPotentialFriendsRequest}          from '../../utils/requestsAPI';
 import { logOut }                             from '../../utils/utilsAPI';
 
 function Profile(props) {
     const [user_data, setUserData] = useState('');
+    const [user_friends, setUserFriends] = useState([]);
+    const [user_potential_friends, setUserPotentialFriends] = useState([]);
     const [user_games, setUserGames] = useState([]);
+    const [error_messages, setErrorMessages] = useState([]);    
+    const [notifications, setNotifications] = useState([]);
 
-    const handleSubmitSearch = e => {
+    const handleSubmitSearch = async (e) => {
         e.preventDefault();
 
-        // const { search } = document.forms[3];
-    }
-
-    const tables = {
-        friends: (
-            <>
-                {
-                    friends_data.length > 0 ?
-                    <div className='my-2 Profile-table'>
-                        <table className='table table-striped table-hover'>
-                            <thead>
-                                <tr>
-                                    <th scope='col'></th>
-                                    <th scope='col'>Nazwa użytkownika</th>
-                                    <th scope='col'>Adres e-mail</th>
-                                    <th scope='col' colSpan='2'></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {friends_data.map((friend, index) => {
-                                    return (
-                                        <tr key={'friend-' + (index + 1)}>
-                                            <th scope='row'>{index + 1}</th>
-                                            <td>{friend[0]}</td>
-                                            <td>{friend[1]}</td>
-                                            <td>                                            
-                                                <Tooltip title='Zaproś do gry' placement='top'>
-                                                    <IconButton aria-label='invite' size='small' color='success' className='p-0'>
-                                                        <PlayArrow fontSize='small'/>
-                                                    </IconButton>
-                                                </Tooltip> 
-                                            </td>
-                                            <td>
-                                                <Tooltip title='Usuń ze znajomych' placement='top'>
-                                                    <IconButton aria-label='delete' size='small' color='error' className='p-0'>
-                                                        <ClearIcon fontSize='small'/>
-                                                    </IconButton>
-                                                </Tooltip>                                    
-                                            </td>
-                                        </tr>
-
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                    : <span className='text-center p-3 text-muted w-100'>Nie masz jeszcze żadnych znajomych</span>
-                }
-            </>
-        ),
-
-        search: (
-            <>
-                {
-                    users_data.length > 0 ?
-                    <>
-                        <form onSubmit={handleSubmitSearch}>
-                            <div className='Profile-search-container d-flex flex-row px-2 py-3 border-bottom'>
-                                <input type='text' className='Profile-search-input px-2' placeholder='Szukaj osób' name='search' />
-                                <button type='submit' className='Profile-search-button btn btn-outline-success btn-sm rounded-0'>
-                                    <FontAwesomeIcon icon={faMagnifyingGlass} />
-                                    {' '}Szukaj
-                                </button>
-                            </div>
-                        </form>
-                        <div className='my-2 Profile-table'>
-                            <table className='table table-striped table-hover'>
-                                <thead>
-                                    <tr>
-                                        <th scope='col'></th>
-                                        <th scope='col'>Nazwa użytkownika</th>
-                                        <th scope='col'>Adres e-mail</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {users_data.sort((a, b) => {
-                                        return a[2] === b[2] ? 0 : a[2] ? -1 : 1;
-                                    }).map((user, index) => {
-                                        return (
-                                            <tr key={'user-' + (index + 1)}>
-                                                <th scope='row'>{index + 1}</th>
-                                                <td>{user[0]}</td>
-                                                <td>{user[1]}</td>    
-                                                <td>
-                                                    <Tooltip title='Zaproś do znajomych' placement='top'>
-                                                        <IconButton aria-label='invite' size='small' color='success' className='p-0'>
-                                                            <AddIcon fontSize='small'/>
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                </td>                    
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    </> :
-                    <span className='text-center p-3 text-muted w-100'>Nie znaleziono żadnych osób</span>
-                }
-            </>
-        ),
-
-        history: (
-            <>
-                {
-                    user_games.length > 0 ?
-                    <div className='my-2 Profile-table'>
-                        <table className='table table-striped table-hover'>
-                            <thead>
-                                <tr>
-                                    <th scope='col'></th>
-                                    <th scope='col'>Przeciwnik</th>
-                                    <th scope='col'>Data</th>
-                                    <th scope='col'>Wynik</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {user_games.map((game, index) => {
-                                    return (
-                                        <tr key={'game-' + (index + 1)}>
-                                            <th scope='row'>{index + 1}</th>
-                                            <td>{game.user1}</td>
-                                            <td>
-                                                {
-                                                    game.gameDate.split('T')[0] + ' ' + game.gameDate.split('T')[1].split('.')[0]
-                                                }
-                                            </td>
-                                            {
-                                                game.winner === 'Wygrana' ?
-                                                <td className='text-success Profile-game-result-text'>{game.winner}</td> :
-                                                <td className='text-danger Profile-game-result-text'>{game.winner}</td>
-                                            }
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div> :
-                    <span className='text-center p-3 text-muted w-100'>Brak gier w historii</span>
-                }
-            </>
-        )
-    };
-
-    const [error_messages,      setErrorMessages     ] = useState([]);
-    const [table_content,       setTableContent      ] = useState(tables.friends);
-    const [notifications_count, setNotificationsCount] = useState(props.notifications_count);
-
-    const getNotifications = () => {
-        const notifications_types = ['invite-friend', 'invite-game', 'delete-friend', 'decline-game'];
-        var notifications_arr     = [];
-
-        for (let i = 0; i < notifications_count; ++i) {
-            notifications_arr.push(<Notification type={notifications_types[Math.floor(Math.random() * notifications_types.length)]} key={'notification_' + (i + 1)} onClick={() => setNotificationsCount(notifications_count => notifications_count - 1)}/>);
+        const { search } = document.forms[3];
+        const [ response, status ] = await userPotentialFriendsRequest(localStorage.getItem('jwt'), search.value === '' ? '*' : search.value);
+        if (status === 200) {
+            setUserPotentialFriends(response);
+        } else {
+            logOut();
         }
-
-        return notifications_arr;
     }
-
-    const database = [
-        {
-            email:    'user1@mail.com',
-            uname:    'user1',
-            password: '12345678'
-        },
-        {
-            email:    'user2@mail.com',
-            uname:    'user2',
-            password: 'qwertyui'
-        }
-    ];
 
     const errors = {
         email_missing:   'Proszę podać adres e-mail',
@@ -263,26 +112,13 @@ function Profile(props) {
                 break;
 
             case 'pass':
-                var current_uname = 'user1';
-                var current_email = 'user1@mail.com';
-
                 var { pass_01, pass_02 } = document.forms[2];
-                var pass_correct         = database.find(user => user.uname === current_uname && user.email === current_email && user.password === pass_01.value);
-                var pass_valid           = true;
-
+                var pass_valid = true;
+                
                 if (pass_01.value.length === 0) {
                     pass_valid = false;
                     error_messages_arr.push({ name: 'pass_01_missing', message: errors.pass_01_missing });
-                } else if (!pass_correct) {
-                    pass_valid = false;
-                    error_messages_arr.push({ name: 'wrong_pass', message: errors.wrong_pass });
                 }
-
-                if (pass_valid && pass_01.value === pass_02.value) {
-                    pass_valid = false;
-                    error_messages_arr.push({ name: 'pass_identical', message: errors.pass_idencital });
-                }
-
                 if (pass_02.value.length === 0) {
                     pass_valid = false;
                     error_messages_arr.push({ name: 'pass_02_missing', message: errors.pass_02_missing });
@@ -291,6 +127,38 @@ function Profile(props) {
                     error_messages_arr.push({ name: 'pass_too_short', message: errors.pass_too_short });
                 }
 
+                if (pass_valid) {
+                    const [ response, status ] = await checkPasswordRequest(localStorage.getItem('jwt'), {
+                        password: pass_01.value
+                    });
+
+                    if (status === 401) {
+                        logOut();
+                    } else if (status === 200) {
+                        if (response === true) {
+                            if (pass_01.value === pass_02.value) {
+                                error_messages_arr.push({ name: 'pass_identical', message: errors.pass_idencital });
+                            } else {
+                                const status_02 = await changePasswordRequest(localStorage.getItem('jwt'), {
+                                    password: pass_02.value
+                                });
+    
+                                if (status_02 === 401) {
+                                    logOut();
+                                } else if (status_02 === 200) {
+                                    window.location.reload(false);
+                                } else {
+                                    error_messages_arr.push({ name: 'server_error', message: errors.server_error });
+                                }
+                            }
+                        } else {
+                            error_messages_arr.push({ name: 'wrong_pass', message: errors.wrong_pass });
+                        }
+                    } else {
+                        error_messages_arr.push({ name: 'server_error', message: errors.server_error });
+                    }
+                }
+                
                 setErrorMessages(error_messages_arr);
                 break;
 
@@ -329,26 +197,25 @@ function Profile(props) {
         }
     };
 
-    const switchTableContent = type => {
-        switch (type) {
-            case 'friends':
-                setTableContent(tables.friends);
-                break;
+    const handleFriendInvite = async (user_id) => {
+        const status = await addNotificationRequest(localStorage.getItem('jwt'), {
+            userId: user_id,
+            type: 'invite-friend'
+        });
 
-            case 'search':
-                setTableContent(tables.search);
-                break;
+        if (status !== 200) {
+            logOut();
+        }
+    }
 
-            case 'history':
-                setTableContent(tables.history);
-                break;
+    const handleFriendDelete = async (user_id) => {
+        const status = await deleteFriendRequest(localStorage.getItem('jwt'), user_id);
 
-            default: 
-                setTableContent(
-                    <h3 className='text-danger text-center p-3'>
-                        Coś poszło nie tak
-                    </h3>
-                );
+        if (status === 200) {
+            window.location.reload(false);
+        } else {
+            console.log(status);
+            // logOut();
         }
     }
 
@@ -374,6 +241,26 @@ function Profile(props) {
             }
         }
 
+        const getUserFriends = async () => {
+            const [ response, status ] = await userFriendsRequest(localStorage.getItem('jwt'));
+
+            if (status === 200) {
+                setUserFriends(response);
+            } else {
+                logOut();
+            }
+        }
+
+        const getUserPotentialFriends = async () => {
+            const [ response, status ] = await userPotentialFriendsRequest(localStorage.getItem('jwt'), '*');
+
+            if (status === 200) {
+                setUserPotentialFriends(response);
+            } else {
+                logOut();
+            }
+        }
+
         const getUserGames = async () => {
             const [ response, status ] = await userGamesRequest(localStorage.getItem('jwt'));
 
@@ -384,25 +271,42 @@ function Profile(props) {
             }
         }
 
-        getUserData();
-        getUserGames();
+        const getNotifications = async () => {
+            const [ response, status ] = await getNotificationsRequest(localStorage.getItem('jwt'));
 
-    }, [])
+            if (status === 200) {
+                var notifications_arr = [];
+                for (const i in response) {
+                    notifications_arr.push(<Notification type={response[i].type} key={'notification_' + (i + 1)} date={response[i].notification_date.split('.')[0]} username={response[i].username} from_user={response[i].from_user} notification_id={response[i].notification_id}/>);
+                }
+
+                setNotifications(notifications_arr);
+            } else {
+                logOut();
+            }
+        }
+
+        getUserData();
+        getUserFriends();
+        getUserPotentialFriends();
+        getUserGames();
+        getNotifications();
+    }, []);
 
     return (
-        <div className='Profile-container my-4 d-flex flex-column flex-md-row'>
+        <div className='Profile-container my-4 d-flex flex-column flex-lg-row'>
             <div className='Profile-user-panel d-flex flex-column'>
                 <div className='Profile-user-info d-flex flex-column p-3'>
                     { user_data }
                     { renderErrorMessage('server_error', 'error_main') }
                 </div>
                 <div className='p-3'>
-                    <CollapseComponent aria_controls='notifications-collapse' button_text='Powiadomienia' notifications_count={notifications_count} button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
+                    <CollapseComponent aria_controls='notifications-collapse' button_text='Powiadomienia' notifications_count={notifications.length} button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
                         {
-                            notifications_count > 0 ?
+                            notifications.length > 0 ?
                             <div className='Profile-notification-container mx-2'>
                                 {
-                                    getNotifications().map(notification => {
+                                    notifications.map(notification => {
                                         return (notification);
                                     })
                                 }
@@ -451,15 +355,160 @@ function Profile(props) {
                         </form>
                     </CollapseComponent>
                 </div>
-            </div>            
-            <div className='Profile-table-container d-flex flex-column'>
-                <div className='d-flex flex-row'>
-                    <button className='btn btn-primary btn-lg Profile-table-button-01' onClick={() => switchTableContent('friends')}>Twoi znajomi </button>
-                    <button className='btn btn-primary btn-lg Profile-table-button-02' onClick={() => switchTableContent('search')} >Szukaj osób  </button>
-                    <button className='btn btn-primary btn-lg Profile-table-button-03' onClick={() => switchTableContent('history')}>Historia gier</button>
+            </div>           
+            <div className='d-flex flex-column Profile-tables-container'>
+                <div className='Profile-table-container d-flex flex-column mb-4'>
+                    <span className='bg-primary p-1 Profile-table-title'>Twoi znajomi</span>
+                    <>
+                    {
+                        user_friends.length > 0 ?
+                        <div className='my-2 Profile-table'>
+                            <table className='table table-striped table-hover'>
+                                <thead>
+                                    <tr>
+                                        <th scope='col'></th>
+                                        <th scope='col'>Nazwa użytkownika</th>
+                                        <th scope='col'>Adres e-mail</th>
+                                        <th scope='col' colSpan='2'></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {user_friends.map((friend, index) => {
+                                        return (
+                                            <tr key={'friend-' + (index + 1)}>
+                                                <th scope='row'>{index + 1}</th>
+                                                <td>{friend.username}</td>
+                                                <td>{friend.email}</td>
+                                                <td>                                            
+                                                    <Tooltip title='Zaproś do gry' placement='top'>
+                                                        <IconButton aria-label='invite' size='small' color='success' className='p-0'>
+                                                            <PlayArrow fontSize='small'/>
+                                                        </IconButton>
+                                                    </Tooltip> 
+                                                </td>
+                                                <td>
+                                                    <Tooltip title='Usuń ze znajomych' placement='top'>
+                                                        <IconButton aria-label='delete' size='small' color='error' className='p-0' onClick={() => handleFriendDelete(friend.userId)}>
+                                                            <ClearIcon fontSize='small'/>
+                                                        </IconButton>
+                                                    </Tooltip>                                    
+                                                </td>
+                                            </tr>
+
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                        : <span className='text-center p-3 text-muted w-100'>Nie masz jeszcze żadnych znajomych</span>
+                    }
+                    </>            
                 </div>
-                {table_content}
-            </div>
+                <div className='Profile-table-container d-flex flex-column mb-4'>
+                    <span className='bg-primary p-1 Profile-table-title'>Historia gier</span>
+                    <>
+                    {
+                        user_games.length > 0 ?
+                        <div className='my-2 Profile-table'>
+                            <table className='table table-striped table-hover'>
+                                <thead>
+                                    <tr>
+                                        <th scope='col'></th>
+                                        <th scope='col'>Przeciwnik</th>
+                                        <th scope='col'>Data</th>
+                                        <th scope='col'>Wynik</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {user_games.map((game, index) => {
+                                        return (
+                                            <tr key={'game-' + (index + 1)}>
+                                                <th scope='row'>{index + 1}</th>
+                                                <td>{game.opponent}</td>
+                                                <td>
+                                                    {
+                                                        game.game_date.split('.')[0]
+                                                    }
+                                                </td>
+                                                {
+                                                    game.result === 'Wygrana' ?
+                                                    <td className='text-success Profile-game-result-text'>{game.result}</td> :
+                                                    <td className='text-danger Profile-game-result-text'>{game.result}</td>
+                                                }
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div> :
+                        <span className='text-center p-3 text-muted w-100'>Brak gier w historii</span>
+                    }
+                    </>
+                </div>
+                <div className='Profile-table-container d-flex flex-column'>
+                    <span className='bg-primary p-1 Profile-table-title'>Szukaj osób</span>
+                    <>
+                    {
+                        user_potential_friends.length > 0 ?
+                        <>
+                            <form onSubmit={handleSubmitSearch}>
+                                <div className='Profile-search-container d-flex flex-row p-3 border-bottom'>
+                                    <input type='text' className='Profile-search-input px-2' placeholder='Szukaj osób' name='search' />
+                                    <button type='submit' className='Profile-search-button btn btn-outline-success btn-sm rounded-0'>
+                                        <FontAwesomeIcon icon={faMagnifyingGlass} />
+                                        {' '}Szukaj
+                                    </button>
+                                </div>
+                            </form>
+                            <div className='my-2 Profile-table'>
+                                <table className='table table-striped table-hover'>
+                                    <thead>
+                                        <tr>
+                                            <th scope='col'></th>
+                                            <th scope='col'>Nazwa użytkownika</th>
+                                            <th scope='col'>Adres e-mail</th>
+                                            <th scope='col'></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {user_potential_friends.sort((a, b) => {
+                                            return a[2] === b[2] ? 0 : a[2] ? -1 : 1;
+                                        }).map((potential_friend, index) => {
+                                            return (
+                                                <tr key={'potential-friend-' + (index + 1)}>
+                                                    <th scope='row'>{index + 1}</th>
+                                                    <td>{potential_friend.username}</td>
+                                                    <td>{potential_friend.email}</td>    
+                                                    <td>
+                                                        <Tooltip title='Zaproś do znajomych' placement='top'>
+                                                            <IconButton aria-label='invite' size='small' color='success' className='p-0' onClick={() => handleFriendInvite(potential_friend.userId)}>
+                                                                <AddIcon fontSize='small'/>
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </td>                    
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </> :
+                        <>
+                            <form onSubmit={handleSubmitSearch}>
+                                <div className='Profile-search-container d-flex flex-row p-3 border-bottom'>
+                                    <input type='text' name='search' className='Profile-search-input px-2' placeholder='Szukaj osób'/>
+                                    <button type='submit' className='Profile-search-button btn btn-outline-success btn-sm rounded-0'>
+                                        <FontAwesomeIcon icon={faMagnifyingGlass} />
+                                        {' '}Szukaj
+                                    </button>
+                                </div>
+                            </form>
+                            <span className='text-center p-3 text-muted w-100'>Nie znaleziono żadnych osób</span>
+                        </>
+                    }
+                    </>
+                </div>
+            </div> 
         </div>
     );
 }

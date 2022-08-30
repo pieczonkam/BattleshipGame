@@ -288,28 +288,26 @@ body {
     text-align: center;
 }
 
+.Profile-tables-container {
+    width: 65%;
+    margin: 20px;
+}
+
 .Profile-table-container {
     background-color: white;
     border-radius: 8px;
-    width: 65%;
-    margin: 20px;
+    width: 100%;
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
-    max-height: 550px;
+    max-height: 400px;
 }
 
-.Profile-table-button-01 {
-    width: 33.3333%;
-    border-radius: 8px 0 0 0;
-}
-
-.Profile-table-button-02 {
-    width: 33.3333%;
-    border-radius: 0;
-}
-
-.Profile-table-button-03 {
-    width: 33.3333%;
-    border-radius: 0 8px 0 0;
+.Profile-table-title {
+    font-size: 20px;
+    font-weight: 500;
+    width: 100%;
+    text-align: center;
+    color: white;
+    border-radius: 8px 8px 0 0;
 }
 
 .Profile-table {
@@ -348,16 +346,6 @@ th, td {
 
 /* Media */
 
-@media only screen and (max-width: 1031.8px) {
-    .Profile-user-panel {
-        width: 45%;
-    }
-
-    .Profile-table-container {
-        width: 50%;
-    }
-}
-
 @media only screen and (max-width: 977.8px) {
     .Game-container {
         flex-direction: column;
@@ -370,11 +358,7 @@ th, td {
     }
 }
 
-@media only screen and (max-width: 767.8px) {
-    .Game-ships-container-horizontal, .Game-ships-container-vertical {
-        width: 90%;
-    }
-
+@media only screen and (max-width: 991.8px) {
     .Profile-container {
         align-items: center;
     }
@@ -383,9 +367,15 @@ th, td {
         width: 95%;
     }
 
-    .Profile-table-container {
+    .Profile-tables-container {
         width: 95%;
     }
+}
+
+@media only screen and (max-width: 767.8px) {
+    .Game-ships-container-horizontal, .Game-ships-container-vertical {
+        width: 90%;
+    }  
 }
 
 /* Custom scrollbar */
