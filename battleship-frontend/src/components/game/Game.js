@@ -1,19 +1,34 @@
-import React, { useState }     from 'react';
-import { FontAwesomeIcon }     from '@fortawesome/react-fontawesome';
-import { faRotate }            from '@fortawesome/free-solid-svg-icons';
-import { Tooltip, Button }     from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { useNavigate }                from 'react-router-dom'
+import { FontAwesomeIcon }            from '@fortawesome/react-fontawesome';
+import { faRotate }                   from '@fortawesome/free-solid-svg-icons';
+import { Tooltip, Button }            from '@mui/material';
 
-import ShipsContainer          from './ShipsContainer';
-import Ship                    from './Ship';
-import BoardTile               from './BoardTile'
+import ShipsContainer                 from './ShipsContainer';
+import Ship                           from './Ship';
+import BoardTile                      from './BoardTile'
 
-import { BOARD_SIZE }          from '../../utils/constants';
-import { prepareBoardMap }     from '../../utils/utils';
+import { BOARD_SIZE }                 from '../../utils/constants';
+import { prepareBoardMap }            from '../../utils/utils';
+import { switchNavLink }              from '../../utils/utils';
 
-function Game() {
+function Game(props) {
     const [ships_vertical, setShipsVertical]    = useState(false);
     const [board_map, setBoardMap]              = useState(prepareBoardMap(BOARD_SIZE));
     const [drag_over_update, setDragOverUpdate] = useState(true);
+    const [opponent, setOpponent]               = useState(localStorage.getItem('opponent') ? localStorage.getItem('opponent') : '');
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // if (!localStorage.getItem('opponent')) {
+        //     navigate('/');
+        // } else {
+        //     switchNavLink('navlink-1');
+        // }
+
+        switchNavLink('navlink-1');
+    }, []);
 
     const getBoard = type => {
         var board_tiles_arr = [];
@@ -35,6 +50,22 @@ function Game() {
         return board_tiles_arr;
     }
 
+    const startGame = () => {
+        var opponent = localStorage.getItem('opponent');
+
+        if (opponent) {
+            props.sendPrivateMessage(opponent, 'Hello there');
+        }
+
+        // localStorage.setItem('your_move', getRandomInt(0, 2) === 0 ? 'false' : 'true');
+
+        // if (document.getElementById('ship-container').childNodes.length > 0) {
+        //     alert('Proszę rozmieścić wszystkie statki na planszy.');
+        // } else if (opponent === '') {
+        //     alert('Nie masz jeszcze przeciwnika. Poczekaj, aż dołączy do rozgrywki lub zaproś znajomego w zakładce Profil.');
+        // }
+    }
+
     return (
             <div className='d-flex flex-column align-items-center'>
                 <div className='Game-container my-2'>
@@ -50,7 +81,10 @@ function Game() {
                         </div>
                     </div>
                     <div className='Game-board-b d-flex flex-column align-items-center text-bold'>
-                        <span className='Game-board-title'>Statki przeciwnika</span>
+                        <span>
+                            <span className='Game-board-title'>Statki przeciwnika</span>
+                            <span className='Game-board-title-nickname'> ({opponent === '' ? '-' : opponent})</span>    
+                        </span>
                         <div className='Game-board-b-outer'>
                             {getBoard('b')}
                         </div>
@@ -66,7 +100,7 @@ function Game() {
                     </Tooltip>
                 </span>
                 <div className='d-flex flex-row'>
-                    <button className='btn btn-primary mx-1 px-5 rounded-0' onClick={() => console.log('Start!')}>
+                    <button className='btn btn-primary mx-1 px-5 rounded-0' onClick={startGame}>
                         Start
                     </button>
                     <button className='btn btn-primary mx-1 px-3 rounded-0' onClick={() => setShipsVertical(!ships_vertical)}>

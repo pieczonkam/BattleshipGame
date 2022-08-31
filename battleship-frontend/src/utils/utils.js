@@ -29,5 +29,32 @@ const validateEmail = (email) => {
     return email_valid;
 }
 
-export { getRandomInt, prepareBoardMap, validateEmail };
+const clearLocalStorage = () => {
+    localStorage.removeItem('your_move');
+    localStorage.removeItem('opponent');
+}
+
+const switchNavLink = (nav_link) => {
+    const nav_links = [
+        'navlink-1',
+        'navlink-2',
+        'navlink-3',
+        'navlink-4',
+        'navlink-5'
+    ]
+
+    for (const nl of nav_links) {
+        let el = document.getElementById(nl);
+
+        if (el) {
+            if (nl !== nav_link) {
+                el.classList.remove('active');
+            } else {
+                el.classList.add('active');
+            }
+        }
+    }
+}
+
+export { getRandomInt, prepareBoardMap, validateEmail, clearLocalStorage, switchNavLink };
 

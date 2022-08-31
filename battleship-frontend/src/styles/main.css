@@ -111,7 +111,11 @@ body {
 }
 
 .Game-board-title {
-    font-size: 26px;
+    font-size: 24px;
+}
+
+.Game-board-title-nickname {
+    font-size: 18px;
 }
 
 .Game-board-tile-text {

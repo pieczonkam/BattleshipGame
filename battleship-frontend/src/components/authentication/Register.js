@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
-import { registerRequest } from '../../utils/requestsAPI';
+import React, { useState, useEffect } from 'react';
+import { registerRequest }            from '../../utils/requestsAPI';
 
-import { validateEmail }   from '../../utils/utils';
+import { validateEmail }              from '../../utils/utils';
+import { switchNavLink }              from '../../utils/utils';
 
 function Register() {
     const [messages, setMessages] = useState([]);
+
+    useEffect(() => {
+        switchNavLink('navlink-5');
+    }, []);
 
     const errors = {
         email_missing:   'Proszę podać adres e-mail',

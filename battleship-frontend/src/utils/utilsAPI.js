@@ -1,11 +1,21 @@
-import { jwtValidRequest } from "./requestsAPI";
+import { jwtValidRequest, userDataRequest } from "./requestsAPI";
+import { clearLocalStorage }                from "./utils";
 
-const setJWT = (jwt) => {
+const setLoginData = async (jwt) => {
     localStorage.setItem('jwt', jwt);
+
+    const [ response, status ] = await userDataRequest(jwt);
+
+    if (status !== 200) {
+        logOut();
+    } else {
+        localStorage.setItem('username', response.username);
+    }
 }
 
 const logOut = () => {
     localStorage.removeItem('jwt');
+    clearLocalStorage();
     window.location.reload(false);
 }
 
@@ -26,4 +36,4 @@ const isLoggedIn = async () => {
     return false;
 }
 
-export { setJWT, logOut, isLoggedIn }
+export { setLoginData, logOut, isLoggedIn }

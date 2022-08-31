@@ -180,13 +180,17 @@ function BoardTile(props) {
     }
 
     const onBoardBClick = e => {
-        if (!(e.target.classList.contains('Game-board-tile-bg-b-clicked-hit') || e.target.classList.contains('Game-board-tile-bg-b-clicked-miss'))) {
-            var nmb = Math.random();
-            if (nmb > 0.7) {
-                e.target.className = 'Game-board-tile-bg-b-clicked-hit';    
-            } else {
-                e.target.className = 'Game-board-tile-bg-b-clicked-miss';
+        if (localStorage.getItem('your_move') === 'true') {
+            if (!(e.target.classList.contains('Game-board-tile-bg-b-clicked-hit') || e.target.classList.contains('Game-board-tile-bg-b-clicked-miss'))) {
+                var nmb = Math.random();
+                if (nmb > 0.7) {
+                    e.target.className = 'Game-board-tile-bg-b-clicked-hit';    
+                } else {
+                    e.target.className = 'Game-board-tile-bg-b-clicked-miss';
+                }
             }
+        } else {
+            alert('Ruch przeciwnika. Poczekaj na swoją kolej');
         }
     }
 

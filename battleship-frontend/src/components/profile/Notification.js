@@ -33,7 +33,13 @@ function Notification(props) {
                     logOut();
                 }
             } else if (props.type === 'invite-game') {
+                const status_02 = await deleteNotificationRequest(localStorage.getItem('jwt'), props.notification_id);
 
+                if (status_02 === 200) {
+                    window.location.reload(false);
+                } else {
+                    logOut();
+                }
             }
         }
     }

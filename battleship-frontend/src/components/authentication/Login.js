@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
-import { loginRequest }    from '../../utils/requestsAPI';
-import { setJWT }          from '../../utils/utilsAPI';
+import React, { useState, useEffect } from 'react';
+import { loginRequest }               from '../../utils/requestsAPI';
+import { switchNavLink }              from '../../utils/utils';
+import { setLoginData }               from '../../utils/utilsAPI';
  
 function Login() {
     const [error_messages, setErrorMessages] = useState([]);
+
+    useEffect(() => {
+        switchNavLink('navlink-4');
+    }, []);
 
     const errors = {
         email_missing: 'Proszę podać adres e-mail',
@@ -42,7 +47,7 @@ function Login() {
             } else if (status !== 200) {
                 error_messages_arr.push({ name: 'server_error', message: errors.server_error });
             } else {
-                setJWT(response);
+                await setLoginData(response);
                 window.location.reload(false);
             }            
         } 

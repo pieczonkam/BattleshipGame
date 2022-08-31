@@ -210,13 +210,18 @@ public class UserController {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 
-            if (notification.getType().equals("invite-friend")) {
-                Long userId = notification.getUserId();
-                Long fromUser = JWTUtils.getIdFromJWT(jwt);
+            Long userId = notification.getUserId();
+            Long fromUser = JWTUtils.getIdFromJWT(jwt);
 
-                if (notificationService.checkIfNotificationExists(userId, fromUser).size() == 0 && userRelationService.checkIfRelationExists(userId, fromUser).size() == 0) {
-                    notificationService.addNotification(new Notification(userId, fromUser, new Timestamp((new Date()).getTime()), notification.getType()));
-                }
+            Boolean addNotification = true;
+            if (notificationService.checkIfNotificationExists(userId, fromUser).size() > 0) {
+                addNotification = false;
+            } else if (notification.getType().equals("invite-friend") && userRelationService.checkIfRelationExists(userId, fromUser).size() > 0) {
+                addNotification = false;
+            }
+
+            if (addNotification) {
+                notificationService.addNotification(new Notification(userId, fromUser, new Timestamp((new Date()).getTime()), notification.getType()));
             }
 
             return new ResponseEntity<>(HttpStatus.OK);

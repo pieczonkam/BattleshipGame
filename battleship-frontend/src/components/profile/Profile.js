@@ -1,4 +1,5 @@
 import { React, useEffect, useState }         from 'react';
+import { useNavigate }                        from 'react-router-dom'
 import { Tooltip, IconButton }                from '@mui/material';
 import ClearIcon                              from '@mui/icons-material/Clear'
 import PlayArrow                              from '@mui/icons-material/PlayArrow';
@@ -21,14 +22,18 @@ import { addNotificationRequest, changeEmailRequest,
         userGamesRequest, 
         userPotentialFriendsRequest}          from '../../utils/requestsAPI';
 import { logOut }                             from '../../utils/utilsAPI';
+import { clearLocalStorage }                  from '../../utils/utils';
+import { switchNavLink }                      from '../../utils/utils';
 
-function Profile(props) {
+function Profile() {
     const [user_data, setUserData] = useState('');
     const [user_friends, setUserFriends] = useState([]);
     const [user_potential_friends, setUserPotentialFriends] = useState([]);
     const [user_games, setUserGames] = useState([]);
     const [error_messages, setErrorMessages] = useState([]);    
     const [notifications, setNotifications] = useState([]);
+
+    const navigate = useNavigate();
 
     const handleSubmitSearch = async (e) => {
         e.preventDefault();
@@ -197,6 +202,20 @@ function Profile(props) {
         }
     };
 
+    const handleGameInvite = async (user_id, username) => {
+        const status = await addNotificationRequest(localStorage.getItem('jwt'), {
+            userId: user_id,
+            type: 'invite-game'
+        });
+
+        if (status !== 200) {
+            logOut();
+        } else {
+            localStorage.setItem('opponent', username);
+            navigate('/game');
+        }
+    }
+
     const handleFriendInvite = async (user_id) => {
         const status = await addNotificationRequest(localStorage.getItem('jwt'), {
             userId: user_id,
@@ -214,8 +233,7 @@ function Profile(props) {
         if (status === 200) {
             window.location.reload(false);
         } else {
-            console.log(status);
-            // logOut();
+            logOut();
         }
     }
 
@@ -291,6 +309,8 @@ function Profile(props) {
         getUserPotentialFriends();
         getUserGames();
         getNotifications();
+        clearLocalStorage();
+        switchNavLink('navlink-2');
     }, []);
 
     return (
@@ -381,7 +401,7 @@ function Profile(props) {
                                                 <td>{friend.email}</td>
                                                 <td>                                            
                                                     <Tooltip title='Zaproś do gry' placement='top'>
-                                                        <IconButton aria-label='invite' size='small' color='success' className='p-0'>
+                                                        <IconButton aria-label='invite' size='small' color='success' className='p-0' onClick={() => handleGameInvite(friend.userId, friend.username)}>
                                                             <PlayArrow fontSize='small'/>
                                                         </IconButton>
                                                     </Tooltip> 
