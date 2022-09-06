@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate }                from 'react-router-dom'
 import { FontAwesomeIcon }            from '@fortawesome/react-fontawesome';
-import { faRotate }                   from '@fortawesome/free-solid-svg-icons';
+import { faRotate,
+        faRotateRight,
+        faPlay }                      from '@fortawesome/free-solid-svg-icons';
 import { Tooltip, Button }            from '@mui/material';
 
 import ShipsContainer                 from './ShipsContainer';
@@ -94,7 +96,13 @@ function Game(props) {
                         </div>
                         <span className='px-2 pt-2 pb-1'>
                             <Tooltip title=
-                                'Przeciągnij statki z dolnego panelu na lewą planszę. Możesz obrócic statki w panelu klikając na przycisk "Obróć statki". Wciśnij start aby rozpocząć grę. Znajdź statki przeciwnika, klikając na pola na prawej planszy.'
+                                {<p style={{fontSize: '16px', padding: '10px 10px 0 10px'}}>
+                                    Przeciągnij statki z dolnego panelu na planszę <b>Twoje statki</b>.
+                                    <br/><br/>Możesz obrócić statki w panelu klikając na przycisk <b><FontAwesomeIcon icon={faRotate}/> Obróć statki</b>.
+                                    <br/><br/>Wciśnij <b><FontAwesomeIcon icon={faPlay}/> Start</b> aby rozpocząć grę.
+                                    <br/><br/>Znajdź statki przeciwnika, klikając na pola na planszy <b>Statki przeciwnika</b>.
+                                    <br/><br/>Aby zresetować pozycje statków, kliknij przycisk <b><FontAwesomeIcon icon={faRotateRight}/> Reset</b>.
+                                </p>}
                             placement='top'>
                                 <Button>
                                     Jak grać?
@@ -102,15 +110,17 @@ function Game(props) {
                             </Tooltip>
                         </span>
                         <div className='d-flex flex-row'>
-                            <button className='btn btn-primary mx-1 px-5 rounded-0' onClick={startGame}>
-                                Start
-                            </button>
-                            <button className='btn btn-primary mx-1 px-3 rounded-0' onClick={() => setShipsVertical(!ships_vertical)}>
+                            <button className='Game-button-short btn btn-primary mx-1 rounded-0' onClick={() => setShipsVertical(!ships_vertical)}>
                                 <FontAwesomeIcon icon={faRotate}/>
                                 {' '}Obróć statki
                             </button>
-                            <button className='btn btn-primary mx-1 px-5 rounded-0' onClick={() => window.location.reload(false)}>
-                                Reset
+                            <button className='Game-button-long btn btn-success mx-1 rounded-0' onClick={startGame}>
+                                <FontAwesomeIcon icon={faPlay}/>
+                                {' '}Start
+                            </button>
+                            <button className='Game-button-short btn btn-primary mx-1 rounded-0' onClick={() => window.location.reload(false)}>
+                                <FontAwesomeIcon icon={faRotateRight}/>
+                                {' '}Reset
                             </button>
                         </div>
                         <ShipsContainer id='ship-container' className={ships_vertical ? 'Game-ships-container-vertical' : 'Game-ships-container-horizontal'} vertical={ships_vertical}>

@@ -1,9 +1,12 @@
-import React                                                 from 'react';
-import { Nav, Navbar, NavLink }                              from 'react-bootstrap';
-import { Link }                                              from 'react-router-dom';
-import { FontAwesomeIcon }                                   from '@fortawesome/react-fontawesome';
-import { faUserPlus, faArrowRightToBracket, faShip, faUser } from '@fortawesome/free-solid-svg-icons';
-import { logOut } from '../utils/utilsAPI';
+import React                    from 'react';
+import { Nav, Navbar, NavLink } from 'react-bootstrap';
+import { Link }                 from 'react-router-dom';
+import { FontAwesomeIcon }      from '@fortawesome/react-fontawesome';
+import { faUserPlus, 
+        faArrowRightToBracket, 
+        faShip, 
+        faUser }                from '@fortawesome/free-solid-svg-icons';
+import { logOut }               from '../utils/utilsAPI';
 
 function NavigationBar(props) {
     return (

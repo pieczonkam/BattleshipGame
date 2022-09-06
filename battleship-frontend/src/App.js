@@ -4,7 +4,7 @@ import SockJS                         from 'sockjs-client';
 import {over}                         from 'stompjs'
 
 import { isLoggedIn, logOut }         from './utils/utilsAPI';
-import { clearLocalStorage }          from './utils/utils';
+import { clearGameData }              from './utils/utils';
 
 import NavigationBar                  from './components/NavigationBar';
 import Game                           from './components/game/Game';
@@ -73,7 +73,7 @@ function App() {
         }
 
         checkLoggedIn();
-        clearLocalStorage();
+        clearGameData();
     }, []);
 
     return (

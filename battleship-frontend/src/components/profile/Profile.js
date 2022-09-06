@@ -1,18 +1,18 @@
-import { React, useEffect, useState }         from 'react';
-import { useNavigate }                        from 'react-router-dom'
-import { Tooltip, IconButton }                from '@mui/material';
-import ClearIcon                              from '@mui/icons-material/Clear'
-import PlayArrow                              from '@mui/icons-material/PlayArrow';
-import AddIcon                                from '@mui/icons-material/Add';
-import { FontAwesomeIcon }                    from '@fortawesome/react-fontawesome';
+import { React, useEffect, useState } from 'react';
+import { useNavigate }                from 'react-router-dom'
+import { Tooltip, IconButton }        from '@mui/material';
+import ClearIcon                      from '@mui/icons-material/Clear'
+import PlayArrow                      from '@mui/icons-material/PlayArrow';
+import AddIcon                        from '@mui/icons-material/Add';
+import { FontAwesomeIcon }            from '@fortawesome/react-fontawesome';
 import { faUser, 
         faEnvelope, 
         faMagnifyingGlass,
-        faRotate}                             from '@fortawesome/free-solid-svg-icons';
+        faRotateRight}                from '@fortawesome/free-solid-svg-icons';
 
-import CollapseComponent                      from './CollapseComponent';      
-import { validateEmail }                      from '../../utils/utils';
-import Notification                           from './Notification';
+import CollapseComponent              from './CollapseComponent';      
+import { validateEmail }              from '../../utils/utils';
+import Notification                   from './Notification';
 import { addNotificationRequest, 
         changeEmailRequest, 
         changePasswordRequest, 
@@ -23,10 +23,10 @@ import { addNotificationRequest,
         userDataRequest, 
         userFriendsRequest, 
         userGamesRequest, 
-        userPotentialFriendsRequest}          from '../../utils/requestsAPI';
-import { logOut }                             from '../../utils/utilsAPI';
-import { clearLocalStorage }                  from '../../utils/utils';
-import { switchNavLink }                      from '../../utils/utils';
+        userPotentialFriendsRequest}  from '../../utils/requestsAPI';
+import { logOut }                     from '../../utils/utilsAPI';
+import { clearGameData }              from '../../utils/utils';
+import { switchNavLink }              from '../../utils/utils';
 
 function Profile() {
     const [user_data, setUserData] = useState({username: '', email: ''});
@@ -396,7 +396,7 @@ function Profile() {
         getUserPotentialFriendsUE();
         getUserGamesUE();
         getNotificationsUE();
-        clearLocalStorage();
+        clearGameData();
         switchNavLink('navlink-2');
     }, []);
 
@@ -418,7 +418,7 @@ function Profile() {
                     <CollapseComponent aria_controls='notifications-collapse' button_text='Powiadomienia' notifications_count={notifications.length} button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
                         <div className='d-flex flex-row justify-content-center mx-1 p-2'>
                             <button className='btn btn-outline-secondary btn-sm rounded-0 w-100' onClick={refreshContent}>
-                                <FontAwesomeIcon icon={faRotate} />
+                                <FontAwesomeIcon icon={faRotateRight} />
                                 {' '}Odśwież
                             </button>
                         </div>

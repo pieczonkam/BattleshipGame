@@ -29,9 +29,10 @@ const validateEmail = (email) => {
     return email_valid;
 }
 
-const clearLocalStorage = () => {
+const clearGameData = () => {
     localStorage.removeItem('your_move');
     localStorage.removeItem('opponent');
+    localStorage.removeItem('ship_id');
 }
 
 const switchNavLink = (nav_link) => {
@@ -56,5 +57,5 @@ const switchNavLink = (nav_link) => {
     }
 }
 
-export { getRandomInt, prepareBoardMap, validateEmail, clearLocalStorage, switchNavLink };
+export { getRandomInt, prepareBoardMap, validateEmail, clearGameData, switchNavLink };
 

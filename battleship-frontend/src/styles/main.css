@@ -95,7 +95,8 @@ body {
     top: 40%;
     -webkit-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
-    border-radius: 8px;
+    border: 2px solid black;
+    font-weight: 600;
 }
 
 .Game-container {    
@@ -105,6 +106,14 @@ body {
     overflow: hidden;
     margin: 0 auto;
 }
+
+.Game-button-short {
+    width: 140px;
+}
+
+.Game-button-long {
+    width: 180px;
+} 
 
 .Game-board-a, .Game-board-b {
     margin: 15px;
@@ -203,6 +212,7 @@ body {
 .Game-ships-container-horizontal, .Game-ships-container-vertical {
     background-color: transparent;
     border: 2px solid black;
+    border-radius: 16px;
     padding: 10px;
     margin: 20px;
     min-height: 100px;
@@ -410,12 +420,6 @@ th, td {
     .Profile-tables-container {
         width: 95%;
     }
-}
-
-@media only screen and (max-width: 767.8px) {
-    .Game-ships-container-horizontal, .Game-ships-container-vertical {
-        width: 90%;
-    }  
 }
 
 /* Custom scrollbar */

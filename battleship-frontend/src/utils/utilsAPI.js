@@ -1,5 +1,5 @@
 import { jwtValidRequest, userDataRequest } from "./requestsAPI";
-import { clearLocalStorage }                from "./utils";
+import { clearGameData }                    from "./utils";
 
 const setLoginData = async (jwt) => {
     localStorage.setItem('jwt', jwt);
@@ -15,7 +15,8 @@ const setLoginData = async (jwt) => {
 
 const logOut = () => {
     localStorage.removeItem('jwt');
-    clearLocalStorage();
+    localStorage.removeItem('username')
+    clearGameData();
     window.location.reload(false);
 }
 
