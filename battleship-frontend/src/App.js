@@ -66,6 +66,8 @@ function App() {
             const is_logged_in = await isLoggedIn();
             if (is_logged_in) {
                 wsConnect();
+            } else {
+                localStorage.removeItem('username');
             }
             setLoggedIn(is_logged_in);
         }

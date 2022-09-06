@@ -212,16 +212,22 @@ public class UserController {
 
             Long userId = notification.getUserId();
             Long fromUser = JWTUtils.getIdFromJWT(jwt);
+            String notificationType = notification.getType();
 
-            Boolean addNotification = true;
-            if (notificationService.checkIfNotificationExists(userId, fromUser).size() > 0) {
-                addNotification = false;
-            } else if (notification.getType().equals("invite-friend") && userRelationService.checkIfRelationExists(userId, fromUser).size() > 0) {
-                addNotification = false;
-            }
+            Boolean relationExists = userRelationService.checkIfRelationExists(userId, fromUser).size() > 0;
+            Boolean notificationExists = notificationService.checkIfNotificationExists(userId, fromUser, notificationType).size() > 0;
 
-            if (addNotification) {
-                notificationService.addNotification(new Notification(userId, fromUser, new Timestamp((new Date()).getTime()), notification.getType()));
+            if (notificationType.equals("invite-friend")) {
+                if (!notificationExists && !relationExists) {
+                    notificationService.addNotification(new Notification(userId, fromUser, new Timestamp((new Date()).getTime()), notification.getType()));
+                }
+            } else if (notificationType.equals("invite-game")) {
+                if (!relationExists) {
+                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                }
+                if (!notificationExists) {
+                    notificationService.addNotification(new Notification(userId, fromUser, new Timestamp((new Date()).getTime()), notification.getType()));
+                }
             }
 
             return new ResponseEntity<>(HttpStatus.OK);
@@ -288,6 +294,8 @@ public class UserController {
                 userRelationService.addRelation(new UserRelation(user1, user2));
             }
 
+            notificationService.deleteNotifications(user1, user2);
+
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -308,6 +316,8 @@ public class UserController {
             if (userRelationService.checkIfRelationExists(user1, user2).size() > 0) {
                 userRelationService.deleteRelation(user1, user2);
             }
+
+            notificationService.deleteNotifications(user1, user2);
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {

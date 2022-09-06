@@ -2,7 +2,8 @@ import React                         from 'react';
 import { Tooltip, IconButton }       from '@mui/material';
 import DoneIcon                      from '@mui/icons-material/Done';
 import ClearIcon                     from '@mui/icons-material/Clear';
-import { addFriendRequest, deleteNotificationRequest } from '../../utils/requestsAPI';
+import { addFriendRequest, 
+        deleteNotificationRequest }  from '../../utils/requestsAPI';
 import { logOut }                    from '../../utils/utilsAPI';
 
 function Notification(props) {
@@ -11,7 +12,7 @@ function Notification(props) {
             const status = await deleteNotificationRequest(localStorage.getItem('jwt'), props.notification_id);
 
             if (status === 200) {
-                window.location.reload(false);
+                props.onClick();
             } else {
                 logOut();
             }
@@ -22,21 +23,15 @@ function Notification(props) {
                 });
 
                 if (status === 200) {
-                    const status_02 = await deleteNotificationRequest(localStorage.getItem('jwt'), props.notification_id);
-
-                    if (status_02 === 200) {
-                        window.location.reload(false);
-                    } else {
-                        logOut();
-                    }
+                    props.onClick();
                 } else {
                     logOut();
                 }
             } else if (props.type === 'invite-game') {
-                const status_02 = await deleteNotificationRequest(localStorage.getItem('jwt'), props.notification_id);
+                const status = await deleteNotificationRequest(localStorage.getItem('jwt'), props.notification_id);
 
-                if (status_02 === 200) {
-                    window.location.reload(false);
+                if (status === 200) {
+                    props.onClick();
                 } else {
                     logOut();
                 }

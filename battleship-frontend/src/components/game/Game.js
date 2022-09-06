@@ -67,57 +67,74 @@ function Game(props) {
     }
 
     return (
-            <div className='d-flex flex-column align-items-center'>
-                <div className='Game-container my-2'>
-                    <div className='Game-board-a d-flex flex-column align-items-center text-bold'>
-                        <span className='Game-board-title'>Twoje statki</span>
-                        <div className='Game-board-a-outer'>
-                            <div className='Game-board-a-inner-bottom'>
-                                {getBoard('a-bg')}
+            <div className='Game-layers-container'>
+                <div className='Game-content-layer'>
+                    <div className='d-flex flex-column align-items-center'>
+                        <div className='Game-container my-2'>
+                            <div className='Game-board-a d-flex flex-column align-items-center text-bold'>
+                                <span className='Game-board-title'>Twoje statki</span>
+                                <div className='Game-board-a-outer'>
+                                    <div className='Game-board-a-inner-bottom'>
+                                        {getBoard('a-bg')}
+                                    </div>
+                                    <div className='Game-board-a-inner-top'>
+                                        {getBoard('a')}
+                                    </div>
+                                </div>
                             </div>
-                            <div className='Game-board-a-inner-top'>
-                                {getBoard('a')}
+                            <div className='Game-board-b d-flex flex-column align-items-center text-bold'>
+                                <span>
+                                    <span className='Game-board-title'>Statki przeciwnika</span>
+                                    <span className='Game-board-title-nickname'> ({opponent === '' ? '-' : opponent})</span>
+                                </span>
+                                <div className='Game-board-b-outer'>
+                                    {getBoard('b')}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div className='Game-board-b d-flex flex-column align-items-center text-bold'>
-                        <span>
-                            <span className='Game-board-title'>Statki przeciwnika</span>
-                            <span className='Game-board-title-nickname'> ({opponent === '' ? '-' : opponent})</span>    
+                        <span className='px-2 pt-2 pb-1'>
+                            <Tooltip title=
+                                'Przeciągnij statki z dolnego panelu na lewą planszę. Możesz obrócic statki w panelu klikając na przycisk "Obróć statki". Wciśnij start aby rozpocząć grę. Znajdź statki przeciwnika, klikając na pola na prawej planszy.'
+                            placement='top'>
+                                <Button>
+                                    Jak grać?
+                                </Button>
+                            </Tooltip>
                         </span>
-                        <div className='Game-board-b-outer'>
-                            {getBoard('b')}
+                        <div className='d-flex flex-row'>
+                            <button className='btn btn-primary mx-1 px-5 rounded-0' onClick={startGame}>
+                                Start
+                            </button>
+                            <button className='btn btn-primary mx-1 px-3 rounded-0' onClick={() => setShipsVertical(!ships_vertical)}>
+                                <FontAwesomeIcon icon={faRotate}/>
+                                {' '}Obróć statki
+                            </button>
+                            <button className='btn btn-primary mx-1 px-5 rounded-0' onClick={() => window.location.reload(false)}>
+                                Reset
+                            </button>
                         </div>
+                        <ShipsContainer id='ship-container' className={ships_vertical ? 'Game-ships-container-vertical' : 'Game-ships-container-horizontal'} vertical={ships_vertical}>
+                            <Ship id='ship-1' key='ship-1' className={ships_vertical ? 'Game-ship ship-4-vertical' : 'Game-ship ship-4-horizontal'} draggable='true' />
+                            <Ship id='ship-2' key='ship-2' className={ships_vertical ? 'Game-ship ship-3-vertical' : 'Game-ship ship-3-horizontal'} draggable='true' />
+                            <Ship id='ship-3' key='ship-3' className={ships_vertical ? 'Game-ship ship-2-vertical' : 'Game-ship ship-2-horizontal'} draggable='true' />
+                            <Ship id='ship-4' key='ship-4' className={ships_vertical ? 'Game-ship ship-2-vertical' : 'Game-ship ship-2-horizontal'} draggable='true' />
+                            <Ship id='ship-5' key='ship-5' className={ships_vertical ? 'Game-ship ship-1-vertical' : 'Game-ship ship-1-horizontal'} draggable='true' />
+                        </ShipsContainer>
                     </div>
                 </div>
-                <span className='px-2 pt-2 pb-1'>
-                    <Tooltip title=
-                        'Przeciągnij statki z dolnego panelu na lewą planszę. Możesz obrócic statki w panelu klikając na przycisk "Obróć statki". Wciśnij start aby rozpocząć grę. Znajdź statki przeciwnika, klikając na pola na prawej planszy.'
-                    placement='top'>
-                        <Button>
-                            Jak grać?
-                        </Button>
-                    </Tooltip>
-                </span>
-                <div className='d-flex flex-row'>
-                    <button className='btn btn-primary mx-1 px-5 rounded-0' onClick={startGame}>
-                        Start
-                    </button>
-                    <button className='btn btn-primary mx-1 px-3 rounded-0' onClick={() => setShipsVertical(!ships_vertical)}>
-                        <FontAwesomeIcon icon={faRotate}/>
-                        {' '}Obróć statki
-                    </button>
-                    <button className='btn btn-primary mx-1 px-5 rounded-0' onClick={() => window.location.reload(false)}>
-                        Reset
-                    </button>
-                </div>
-                <ShipsContainer id='ship-container' className={ships_vertical ? 'Game-ships-container-vertical' : 'Game-ships-container-horizontal'} vertical={ships_vertical}>
-                    <Ship id='ship-1' key='ship-1' className={ships_vertical ? 'Game-ship ship-4-vertical' : 'Game-ship ship-4-horizontal'} draggable='true' />
-                    <Ship id='ship-2' key='ship-2' className={ships_vertical ? 'Game-ship ship-3-vertical' : 'Game-ship ship-3-horizontal'} draggable='true' />
-                    <Ship id='ship-3' key='ship-3' className={ships_vertical ? 'Game-ship ship-2-vertical' : 'Game-ship ship-2-horizontal'} draggable='true' />
-                    <Ship id='ship-4' key='ship-4' className={ships_vertical ? 'Game-ship ship-2-vertical' : 'Game-ship ship-2-horizontal'} draggable='true' />
-                    <Ship id='ship-5' key='ship-5' className={ships_vertical ? 'Game-ship ship-1-vertical' : 'Game-ship ship-1-horizontal'} draggable='true' />
-                </ShipsContainer>
+                {
+                    !localStorage.getItem('opponent') ? 
+                    <div className='Game-info-layer'>
+                        <div className='Game-info'>
+                            <p>
+                                Aby zagrać w Statki Online, zaproś znajomego do gry
+                            </p>
+                            <p>
+                                <a href='/profile'>Przejdź do zakładki profil</a>
+                            </p>
+                        </div>
+                    </div> : ''
+                }
             </div>
     );
 }

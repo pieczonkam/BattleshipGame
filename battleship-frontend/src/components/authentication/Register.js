@@ -19,7 +19,10 @@ function Register() {
         wrong_email:     'Podano błędny adres e-mail',
         email_taken:     'Podany adres e-mail jest już zajęty',
         uname_taken:     'Podana nazwa użytkownika jest już zajęta',
-        pass_too_short:  'Podane hasło jest za krótkie (min. 8 znaków)',
+        uname_too_short: 'Podana nazwa użytkownika jest za krótka (min 3 znaki)',
+        uname_too_long:  'Podana nazwa użytkownika jest za długa (max 20 znaków)',
+        pass_too_short:  'Podane hasło jest za krótkie (min 8 znaków)',
+        pass_too_long:   'Podane hasło jest za długie (max 60 znaków)',
         pass_diff:       'Podano różne hasła',
         server_error:    'Coś poszło nie tak, spróbuj ponownie'
     };
@@ -53,9 +56,21 @@ function Register() {
                 user_valid = false;
                 messages_arr.push({ name: 'wrong_email', message: errors.wrong_email });
             }
+            if (uname.value.length < 3) {
+                user_valid = false;
+                messages_arr.push({ name: 'uname_too_short', message: errors.uname_too_short });
+            }
+            if (uname.value.length > 20) {
+                user_valid = false;
+                messages_arr.push({ name: 'uname_too_long', message: errors.uname_too_long });
+            }
             if (pass_01.value.length < 8) {
                 user_valid = false;
                 messages_arr.push({ name: 'pass_too_short', message: errors.pass_too_short });
+            }
+            if (pass_01.value.length > 60) {
+                user_valid = false;
+                messages_arr.push({ name: 'pass_too_long', message: errors.pass_too_long });
             }
             if (pass_01.value !== pass_02.value) {
                 user_valid = false;
@@ -91,7 +106,7 @@ function Register() {
     };
 
     const renderMessage = (name, type = 'default') => {
-        const message = messages.find(em => em.name === name);
+        const message = messages.find(m => m.name === name);
 
         if (message) {
             if (type === 'error_main' || type === 'success') {
@@ -126,13 +141,16 @@ function Register() {
                         <label className='Auth-form-label'>Nazwa użytkownika</label>
                         <input type='text' className='form-control mt-1 rounded-0' placeholder='Wprowadź nazwę użytkownika' name='uname' />
                         {renderMessage('uname_missing')}
-                        {renderMessage('uname_taken')}           
+                        {renderMessage('uname_taken')}   
+                        {renderMessage('uname_too_short')}
+                        {renderMessage('uname_too_long')}        
                     </div>
                     <div className='form-group mt-3'>
                         <label className='Auth-form-label'>Hasło</label>
                         <input type='password' className='form-control mt-1 rounded-0' placeholder='Wprowadź hasło' name='pass_01'/>
                         {renderMessage('pass_01_missing')}
                         {renderMessage('pass_too_short')}
+                        {renderMessage('pass_too_long')}
                     </div>
                     <div className='form-group mt-3'>
                         <label className='Auth-form-label'>Powtórz hasło</label>

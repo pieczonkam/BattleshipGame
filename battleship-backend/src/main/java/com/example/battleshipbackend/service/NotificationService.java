@@ -21,7 +21,12 @@ public class NotificationService implements INotificationService {
 
     @Override
     public void deleteNotification(Long id) {
-        notificationRepository.deleteById(id);
+        notificationRepository.deleteNotification(id);
+    }
+
+    @Override
+    public void deleteNotifications(Long userId, Long fromUser) {
+        notificationRepository.deleteNotifications(userId, fromUser);
     }
 
     @Override
@@ -30,7 +35,7 @@ public class NotificationService implements INotificationService {
     }
 
     @Override
-    public List<Notification> checkIfNotificationExists(Long userId, Long fromUser) {
-        return notificationRepository.checkIfNotificationExists(userId, fromUser);
+    public List<Notification> checkIfNotificationExists(Long userId, Long fromUser, String type) {
+        return notificationRepository.checkIfNotificationExists(userId, fromUser, type);
     }
 }
