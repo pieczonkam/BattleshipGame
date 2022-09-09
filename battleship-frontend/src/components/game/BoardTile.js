@@ -1,8 +1,13 @@
-import React          from 'react';
+import React             from 'react';
+import { useNavigate }   from 'react-router-dom';
 
-import { BOARD_SIZE } from '../../utils/constants';
+import { clearGameData, 
+       prepareBoardMap } from '../../utils/utils';
+import { BOARD_SIZE }    from '../../utils/constants';
 
 function BoardTile(props) {
+    const navigate = useNavigate();
+
     const shipPositionValid = (target, ship) => {
         // Check if tile is already occupied
         if (target.hasChildNodes()) {
@@ -26,7 +31,10 @@ function BoardTile(props) {
         }
 
         // Check if ship overlaps with any other ship
-        var board_map = props.board_map;
+        var board_map = JSON.parse(localStorage.getItem('board_map'));
+        if (!board_map) {
+            board_map = prepareBoardMap(BOARD_SIZE);
+        }
         
         if (ship_orientation === 'horizontal') {
             for (let i = tile_col - 1; i <= tile_col + ship_length - 2; ++i) {
@@ -60,7 +68,7 @@ function BoardTile(props) {
             }
         }
 
-        props.setBoardMap(board_map);
+        localStorage.setItem('board_map', JSON.stringify(board_map));
 
         return true;
     }
@@ -89,7 +97,10 @@ function BoardTile(props) {
             }
         }
 
-        var board_map = props.board_map;
+        var board_map = JSON.parse(localStorage.getItem('board_map'));
+        if (!board_map) {
+            board_map = prepareBoardMap(BOARD_SIZE);
+        }
 
         if (mode === 'on') {
             for (let i = 0; i < ship_tiles.length; ++i) {
@@ -136,8 +147,24 @@ function BoardTile(props) {
 
             e.target.appendChild(ship);
             e.target.appendChild(ship_clone);
+
+            var ship_class       = [...ship.classList].filter(el => el !== 'Game-ship')[0];
+            var ship_length      = parseInt(ship_class.split('-')[1]) + 1;
+            var ship_orientation = ship_class.split('-')[2];
+            
+            var tile_row = parseInt(e.target.id.split('-')[2]);
+            var tile_col = parseInt(e.target.id.split('-')[3]);
+
+            var ships_set_arr = JSON.parse(localStorage.getItem('ships_set'));
+            if (ships_set_arr) {
+                ships_set_arr.push(String(ship_id + '|' + ship_length + ' ' + ship_orientation + ' ' + tile_row + ' ' + tile_col));
+            } else {
+                ships_set_arr = [String(ship_id + '|' + ship_length + ' ' + ship_orientation + ' ' + tile_row + ' ' + tile_col)];
+            }
+
+            localStorage.setItem('ships_set', JSON.stringify(ships_set_arr));
         } else {
-            document.getElementById('ship-container').appendChild(ship);
+            document.getElementById('ships-container').appendChild(ship);
         }        
     }
     
@@ -180,17 +207,34 @@ function BoardTile(props) {
     }
 
     const onBoardBClick = e => {
-        if (localStorage.getItem('your_move') === 'true') {
-            if (!(e.target.classList.contains('Game-board-tile-bg-b-clicked-hit') || e.target.classList.contains('Game-board-tile-bg-b-clicked-miss'))) {
-                var nmb = Math.random();
-                if (nmb > 0.7) {
-                    e.target.className = 'Game-board-tile-bg-b-clicked-hit';    
-                } else {
-                    e.target.className = 'Game-board-tile-bg-b-clicked-miss';
+        var opponent = localStorage.getItem('opponent');
+        
+        if (opponent) {
+            if (localStorage.getItem('your_move') === 'true') {
+                if (!(e.target.classList.contains('Game-board-tile-bg-b-clicked-hit') || e.target.classList.contains('Game-board-tile-bg-b-clicked-miss'))) {
+                    var tile_id  = e.target.id.split('-');
+                    var tile_row = parseInt(tile_id[2]) - 1;
+                    var tile_col = parseInt(tile_id[3]) - 1;
+                    
+                    var your_hits_map = JSON.parse(localStorage.getItem('your_hits_map'));
+                    if (!your_hits_map) {
+                        your_hits_map = prepareBoardMap(BOARD_SIZE);
+                    }
+
+                    your_hits_map[tile_row][tile_col] = 1;
+                    localStorage.setItem('your_hits_map', JSON.stringify(your_hits_map));
+
+                    props.sendWsMessage(opponent, tile_row + ' ' + tile_col, 'COORDINATES');
+                    
+                    e.target.className = 'Game-board-tile-bg-b-clicked-hit';
                 }
+            } else {
+                alert('Ruch przeciwnika. Poczekaj na swoją kolej');
             }
-        } else {
-            alert('Ruch przeciwnika. Poczekaj na swoją kolej');
+        }
+        else {
+            clearGameData();
+            navigate('/profile');
         }
     }
 
@@ -228,13 +272,32 @@ function BoardTile(props) {
 
     if (props.type === 'a') {
         return (
-            <div id={id_str} className='Game-board-tile' onDragOver={dragOver} onDragLeave={dragLeave} onDrop={drop}></div>
+            <div id={id_str} className='Game-board-tile' onDragOver={dragOver} onDragLeave={dragLeave} onDrop={drop}>
+                {props.children}
+            </div>
         );
     } else if (props.type === 'a-bg') {
         return (
             <div id={id_str} className='Game-board-tile-bg-a'></div>
         );
     } else if (props.type === 'b') {
+        var your_hits_map = JSON.parse(localStorage.getItem('your_hits_map'));
+        if (!your_hits_map) {
+            your_hits_map = prepareBoardMap(BOARD_SIZE);
+        }
+
+        if (your_hits_map[props.x - 1][props.y - 1] === 2) {
+            return (
+                <div id={id_str} className='Game-board-tile-bg-b-clicked-hit' onClick={onBoardBClick}></div>
+            );
+        }
+
+        if (your_hits_map[props.x - 1][props.y - 1] === 1) {
+            return (
+                <div id={id_str} className='Game-board-tile-bg-b-clicked-miss' onClick={onBoardBClick}></div>
+            );
+        }
+
         return (
             <div id={id_str} className='Game-board-tile-bg-b' onClick={onBoardBClick}></div>
         );

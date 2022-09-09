@@ -11,7 +11,7 @@ import { logOut }               from '../utils/utilsAPI';
 function NavigationBar(props) {
     return (
         <Navbar collapseOnSelect expand='md' bg='dark' variant='dark' className='px-2'>
-            <Navbar.Brand href='/'>Statki Online</Navbar.Brand>
+            <Navbar.Brand href='#' onClick={() => window.location.reload(false)}>Statki Online</Navbar.Brand>
             <Navbar.Toggle aria-controls='navbarScroll' data-bs-toggle='collapse' data-bs-target='#navbarScroll' />
             <Navbar.Collapse id='navbarScroll'>
                 <Nav>

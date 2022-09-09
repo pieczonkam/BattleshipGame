@@ -24,9 +24,16 @@ function ShipsContainer(props) {
     }
 
     return (
-        <div id={props.id} className={props.className} onDragOver={dragOver} onDrop={drop}>
-            {props.children}
-        </div>
+        <>
+            {
+                props.title ?
+                <span>{props.title}</span> :
+                ''
+            }
+            <div id={props.id} className={props.className} onDragOver={dragOver} onDrop={drop}>
+                {props.children}
+            </div>
+        </>
     );
 }
 

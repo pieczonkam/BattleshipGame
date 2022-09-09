@@ -14,12 +14,6 @@ public class WebSocketController {
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
 
-    @MessageMapping("/message")
-    @SendTo("/chatroom/public")
-    public Message receiveMessage(@Payload Message message) {
-        return message;
-    }
-
     @MessageMapping("/private-message")
     public Message recMessage(@Payload Message message) {
         simpMessagingTemplate.convertAndSendToUser(message.getReceiverName(), "/private", message);

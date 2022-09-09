@@ -1,7 +1,7 @@
 import { React, useEffect, useState } from 'react';
-import { useNavigate }                from 'react-router-dom'
+import { useNavigate }                from 'react-router-dom';
 import { Tooltip, IconButton }        from '@mui/material';
-import ClearIcon                      from '@mui/icons-material/Clear'
+import ClearIcon                      from '@mui/icons-material/Clear';
 import PlayArrow                      from '@mui/icons-material/PlayArrow';
 import AddIcon                        from '@mui/icons-material/Add';
 import { FontAwesomeIcon }            from '@fortawesome/react-fontawesome';
@@ -396,7 +396,6 @@ function Profile() {
         getUserPotentialFriendsUE();
         getUserGamesUE();
         getNotificationsUE();
-        clearGameData();
         switchNavLink('navlink-2');
     }, []);
 

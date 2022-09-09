@@ -33,6 +33,15 @@ const clearGameData = () => {
     localStorage.removeItem('your_move');
     localStorage.removeItem('opponent');
     localStorage.removeItem('ship_id');
+    localStorage.removeItem('game_started');
+    localStorage.removeItem('you_ready');
+    localStorage.removeItem('opponent_ready');
+    localStorage.removeItem('yout_hits');
+    localStorage.removeItem('opponent_hits');
+    localStorage.removeItem('board_map');
+    localStorage.removeItem('your_hits_map');
+    localStorage.removeItem('opponent_hits_map');
+    localStorage.removeItem('ships_set');
 }
 
 const switchNavLink = (nav_link) => {
@@ -57,5 +66,23 @@ const switchNavLink = (nav_link) => {
     }
 }
 
-export { getRandomInt, prepareBoardMap, validateEmail, clearGameData, switchNavLink };
+const isShipSunk = (hits_map, ship_parameters) => {
+    if (ship_parameters.orientation === 'horizontal') {
+        for (let i = 0; i < ship_parameters.length; ++i) {
+            if (hits_map[ship_parameters.x + i][ship_parameters.y] !== 2) {
+                return false;
+            }
+        }
+    } else {
+        for (let i = 0; i < ship_parameters.length; ++i) {
+            if (hits_map[ship_parameters.x][ship_parameters.y] !== 2) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+export { getRandomInt, prepareBoardMap, validateEmail, clearGameData, switchNavLink, isShipSunk };
 
