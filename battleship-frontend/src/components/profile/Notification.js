@@ -12,7 +12,7 @@ function Notification(props) {
             const status = await deleteNotificationRequest(localStorage.getItem('jwt'), props.notification_id);
 
             if (status === 200) {
-                props.onClick();
+                props.onClickDecline();
             } else {
                 logOut();
             }
@@ -23,7 +23,7 @@ function Notification(props) {
                 });
 
                 if (status === 200) {
-                    props.onClick();
+                    props.onClickAccept();
                 } else {
                     logOut();
                 }
@@ -31,7 +31,7 @@ function Notification(props) {
                 const status = await deleteNotificationRequest(localStorage.getItem('jwt'), props.notification_id);
 
                 if (status === 200) {
-                    props.onClick();
+                    props.onClickAccept();
                 } else {
                     logOut();
                 }

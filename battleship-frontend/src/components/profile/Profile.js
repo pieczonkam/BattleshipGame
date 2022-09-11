@@ -1,18 +1,18 @@
-import { React, useEffect, useState } from 'react';
-import { useNavigate }                from 'react-router-dom';
-import { Tooltip, IconButton }        from '@mui/material';
-import ClearIcon                      from '@mui/icons-material/Clear';
-import PlayArrow                      from '@mui/icons-material/PlayArrow';
-import AddIcon                        from '@mui/icons-material/Add';
-import { FontAwesomeIcon }            from '@fortawesome/react-fontawesome';
+import { React, useEffect, useState }         from 'react';
+import { useNavigate }                        from 'react-router-dom';
+import { Tooltip, IconButton }                from '@mui/material';
+import ClearIcon                              from '@mui/icons-material/Clear';
+import PlayArrow                              from '@mui/icons-material/PlayArrow';
+import AddIcon                                from '@mui/icons-material/Add';
+import { FontAwesomeIcon }                    from '@fortawesome/react-fontawesome';
 import { faUser, 
         faEnvelope, 
         faMagnifyingGlass,
-        faRotateRight}                from '@fortawesome/free-solid-svg-icons';
+        faRotateRight}                        from '@fortawesome/free-solid-svg-icons';
 
-import CollapseComponent              from './CollapseComponent';      
-import { validateEmail }              from '../../utils/utils';
-import Notification                   from './Notification';
+import CollapseComponent                      from './CollapseComponent';      
+import { validateEmail }                      from '../../utils/utils';
+import Notification                           from './Notification';
 import { addNotificationRequest, 
         changeEmailRequest, 
         changePasswordRequest, 
@@ -23,12 +23,13 @@ import { addNotificationRequest,
         userDataRequest, 
         userFriendsRequest, 
         userGamesRequest, 
-        userPotentialFriendsRequest}  from '../../utils/requestsAPI';
-import { logOut }                     from '../../utils/utilsAPI';
-import { clearGameData }              from '../../utils/utils';
-import { switchNavLink }              from '../../utils/utils';
+        userPotentialFriendsRequest,
+        addGameRequest,
+        deleteNotificationByUsersDataRequest} from '../../utils/requestsAPI';
+import { logOut, logOutCancel }               from '../../utils/utilsAPI';
+import { switchNavLink }                      from '../../utils/utils';
 
-function Profile() {
+function Profile(props) {
     const [user_data, setUserData] = useState({username: '', email: ''});
     const [user_friends, setUserFriends] = useState([]);
     const [user_potential_friends, setUserPotentialFriends] = useState([]);
@@ -228,6 +229,17 @@ function Profile() {
         }
     };
 
+    const handleGameAccept = (username) => {
+        props.sendWsMessage(username, '', 'ACCEPT');
+        localStorage.setItem('opponent', username);
+        navigate('/game');
+    }
+
+    const handleGameDecline = (username) => {
+        props.sendWsMessage(username, '', 'DECLINE');
+        refreshContent();
+    }
+
     const handleGameInvite = async (user_id, username) => {
         const status = await addNotificationRequest(localStorage.getItem('jwt'), {
             userId: user_id,
@@ -309,7 +321,11 @@ function Profile() {
         if (status === 200) {
             var notifications_arr = [];
             for (const i in response) {
-                notifications_arr.push(<Notification type={response[i].type} key={'notification_' + (i + 1)} date={response[i].notification_date.split('.')[0]} username={response[i].username} from_user={response[i].from_user} notification_id={response[i].notification_id} onClick={refreshContent}/>);
+                if (response[i].type === 'invite-game') {
+                    notifications_arr.push(<Notification type={response[i].type} key={'notification_' + (i + 1)} date={response[i].notification_date.split('.')[0]} username={response[i].username} from_user={response[i].from_user} notification_id={response[i].notification_id} onClickAccept={() => handleGameAccept(response[i].username)} onClickDecline={() => handleGameDecline(response[i].username)}/>);
+                } else {
+                    notifications_arr.push(<Notification type={response[i].type} key={'notification_' + (i + 1)} date={response[i].notification_date.split('.')[0]} username={response[i].username} from_user={response[i].from_user} notification_id={response[i].notification_id} onClickAccept={refreshContent} onClickDecline={refreshContent}/>);
+                }
             }
             setNotifications(notifications_arr);
         } else {
@@ -326,7 +342,46 @@ function Profile() {
         document.forms[3].reset();
     }
 
+    const handleLogoutDuringGame = async () => {
+        var opponent = localStorage.getItem('opponent');
+        var username = localStorage.getItem('username');
+
+        if (opponent) {
+            props.sendWsMessage(opponent, '', 'SURRENDER');
+
+            if (username) {
+                await addGameRequest(localStorage.getItem('jwt'), {
+                    username1: opponent, 
+                    username2: username 
+                });
+            }
+        }
+        
+        logOut(true);
+    }
+
+    const handleLogoutDuringPrep = async () => {
+        var opponent = localStorage.getItem('opponent');
+        if (opponent) {
+            await deleteNotificationByUsersDataRequest(localStorage.getItem('jwt'), opponent);
+            props.sendWsMessage(opponent, '', 'CANCEL');
+        }
+        
+        logOut(true);
+    }
+
     useEffect(() => {
+        const handleGameAcceptUE = (username) => {
+            props.sendWsMessage(username, '', 'ACCEPT');
+            localStorage.setItem('opponent', username);
+            navigate('/game');
+        }
+
+        const handleGameDeclineUE = (username) => {
+            props.sendWsMessage(username, '', 'DECLINE');
+            notificationOnClickUE();
+        }
+
         const getUserDataUE = async () => {
             const [ response, status ] = await userDataRequest(localStorage.getItem('jwt'));
 
@@ -376,7 +431,11 @@ function Profile() {
             if (status === 200) {
                 var notifications_arr = [];
                 for (const i in response) {
-                    notifications_arr.push(<Notification type={response[i].type} key={'notification_' + (i + 1)} date={response[i].notification_date.split('.')[0]} username={response[i].username} from_user={response[i].from_user} notification_id={response[i].notification_id} onClick={notificationOnClickUE}/>);
+                    if (response[i].type === 'invite-game') {
+                        notifications_arr.push(<Notification type={response[i].type} key={'notification_' + (i + 1)} date={response[i].notification_date.split('.')[0]} username={response[i].username} from_user={response[i].from_user} notification_id={response[i].notification_id} onClickAccept={() => handleGameAcceptUE(response[i].username)} onClickDecline={() => handleGameDeclineUE(response[i].username)}/>);
+                    } else {
+                        notifications_arr.push(<Notification type={response[i].type} key={'notification_' + (i + 1)} date={response[i].notification_date.split('.')[0]} username={response[i].username} from_user={response[i].from_user} notification_id={response[i].notification_id} onClickAccept={notificationOnClickUE} onClickDecline={notificationOnClickUE}/>);
+                    }
                 }
                 setNotifications(notifications_arr);
             } else {
@@ -397,227 +456,282 @@ function Profile() {
         getUserGamesUE();
         getNotificationsUE();
         switchNavLink('navlink-2');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
-        <div className='Profile-container my-4 d-flex flex-column flex-lg-row'>
-            <div className='Profile-user-panel d-flex flex-column'>
-                <div className='Profile-user-info d-flex flex-column p-3'>
-                    <div>
-                        <FontAwesomeIcon icon={faUser} fixedWidth/>
-                        <span>&nbsp;&nbsp;{user_data.username}</span>
-                    </div>
-                    <div>
-                        <FontAwesomeIcon icon={faEnvelope} fixedWidth/>       
-                        <span>&nbsp;&nbsp;{user_data.email}</span>
-                    </div>
-                    { renderMessage('server_error', 'error_main') }
-                </div>
-                <div className='p-3'>
-                    <CollapseComponent aria_controls='notifications-collapse' button_text='Powiadomienia' notifications_count={notifications.length} button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
-                        <div className='d-flex flex-row justify-content-center mx-1 p-2'>
-                            <button className='btn btn-outline-secondary btn-sm rounded-0 w-100' onClick={refreshContent}>
-                                <FontAwesomeIcon icon={faRotateRight} />
-                                {' '}Odśwież
-                            </button>
+        <div className='Profile-layers-container'>
+            <div className='Profile-content-layer'>
+                <div className='Profile-container my-4 d-flex flex-column flex-lg-row'>
+                    <div className='Profile-user-panel d-flex flex-column'>
+                        <div className='Profile-user-info d-flex flex-column p-3'>
+                            <div>
+                                <FontAwesomeIcon icon={faUser} fixedWidth/>
+                                <span>&nbsp;&nbsp;{user_data.username}</span>
+                            </div>
+                            <div>
+                                <FontAwesomeIcon icon={faEnvelope} fixedWidth/>       
+                                <span>&nbsp;&nbsp;{user_data.email}</span>
+                            </div>
+                            { renderMessage('server_error', 'error_main') }
                         </div>
-                        {
-                            notifications.length > 0 ?
-                            <div className='Profile-notification-container mx-2'>
+                        <div className='p-3'>
+                            <CollapseComponent aria_controls='notifications-collapse' button_text='Powiadomienia' notifications_count={notifications.length} button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
+                                <div className='d-flex flex-row justify-content-center mx-1 p-2'>
+                                    <button className='btn btn-outline-secondary btn-sm rounded-0 w-100' onClick={refreshContent}>
+                                        <FontAwesomeIcon icon={faRotateRight} />
+                                        {' '}Odśwież
+                                    </button>
+                                </div>
                                 {
-                                    notifications.map(notification => {
-                                        return (notification);
-                                    })
+                                    notifications.length > 0 ?
+                                    <div className='Profile-notification-container mx-2'>
+                                        {
+                                            notifications.map(notification => {
+                                                return (notification);
+                                            })
+                                        }
+                                    </div> :
+                                    <div className='text-muted text-center'>Brak powiadomień</div>
                                 }
-                            </div> :
-                            <div className='text-muted text-center'>Brak powiadomień</div>
-                        }
-                    </CollapseComponent>
-                    <CollapseComponent aria_controls='change-uname-collapse' button_text='Zmień nazwę użytkownika' button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
-                        <form onSubmit={handleSubmitUname}>
-                            <div className='p-2 d-flex flex-row Profile-change-data-container'>
-                                <input type='text' className='Profile-change-data-input px-2' placeholder='Wprowadź nową nazwę użytkownika' name='uname' />           
-                                <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm rounded-0'>Dalej</button>
-                            </div>
-                            { renderMessage('uname_missing') }
-                            { renderMessage('uname_taken') }
-                            { renderMessage('change_uname_success', 'success') }
-                        </form>
-                    </CollapseComponent>
-                    <CollapseComponent aria_controls='change-email-collapse' button_text='Zmień adres e-mail' button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
-                        <form onSubmit={handleSubmitEmail}>
-                            <div className='p-2 d-flex flex-row Profile-change-data-container'>
-                                <input type='text' className='Profile-change-data-input px-2' placeholder='Wprowadź nowy adres e-mail' name='email' />           
-                                <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm rounded-0'>Dalej</button>
-                            </div>
-                            { renderMessage('email_missing') }
-                            { renderMessage('email_taken') }
-                            { renderMessage('wrong_email') }
-                            { renderMessage('change_email_success', 'success') }
-                        </form>
-                    </CollapseComponent>
-                    <CollapseComponent aria_controls='change-pass-collapse'  button_text='Zmień hasło' button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
-                        <form onSubmit={handleSubmitPass}>
-                            <div className='d-flex flex-column'>
-                                <div className='p-2 d-flex flex-row Profile-change-data-container'>
-                                    <input type='password' className='Profile-change-data-input px-2' placeholder='Wprowadź obecne hasło' name='pass_01' />
-                                    <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm disabled invisible rounded-0'>Dalej</button>
-                                </div>
-                                { renderMessage('pass_01_missing') }
-                                { renderMessage('wrong_pass') }
-                                <div className='p-2 d-flex flex-row Profile-change-data-container'>
-                                    <input type='password' className='Profile-change-data-input px-2' placeholder='Wprowadź nowe hasło' name='pass_02' />
-                                    <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm rounded-0'>Dalej</button>
-                                </div>
-                                { renderMessage('pass_02_missing') }
-                                { renderMessage('pass_too_short') }
-                                { renderMessage('pass_identical') }
-                                { renderMessage('change_password_success', 'success') }
-                            </div>
-                        </form>
-                    </CollapseComponent>
-                </div>
-            </div>           
-            <div className='d-flex flex-column Profile-tables-container'>
-                <div className='Profile-table-container d-flex flex-column mb-4'>
-                    <span className='bg-primary p-1 Profile-table-title'>Twoi znajomi</span>
-                    <>
-                    {
-                        user_friends.length > 0 ?
-                        <div className='my-2 Profile-table'>
-                            <table className='table table-striped table-hover'>
-                                <thead>
-                                    <tr>
-                                        <th scope='col'></th>
-                                        <th scope='col'>Nazwa użytkownika</th>
-                                        <th scope='col'>Adres e-mail</th>
-                                        <th scope='col' colSpan='2'></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {user_friends.map((friend, index) => {
-                                        return (
-                                            <tr key={'friend-' + (index + 1)}>
-                                                <th scope='row'>{index + 1}</th>
-                                                <td>{friend.username}</td>
-                                                <td>{friend.email}</td>
-                                                <td>                                            
-                                                    <Tooltip title='Zaproś do gry' placement='top'>
-                                                        <IconButton aria-label='invite' size='small' color='success' className='p-0' onClick={() => handleGameInvite(friend.userId, friend.username)}>
-                                                            <PlayArrow fontSize='small'/>
-                                                        </IconButton>
-                                                    </Tooltip> 
-                                                </td>
-                                                <td>
-                                                    <Tooltip title='Usuń ze znajomych' placement='top'>
-                                                        <IconButton aria-label='delete' size='small' color='error' className='p-0' onClick={() => handleFriendDelete(friend.userId)}>
-                                                            <ClearIcon fontSize='small'/>
-                                                        </IconButton>
-                                                    </Tooltip>                                    
-                                                </td>
-                                            </tr>
-
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
+                            </CollapseComponent>
+                            <CollapseComponent aria_controls='change-uname-collapse' button_text='Zmień nazwę użytkownika' button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
+                                <form onSubmit={handleSubmitUname}>
+                                    <div className='p-2 d-flex flex-row Profile-change-data-container'>
+                                        <input type='text' className='Profile-change-data-input px-2' placeholder='Wprowadź nową nazwę użytkownika' name='uname' />           
+                                        <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm rounded-0'>Dalej</button>
+                                    </div>
+                                    { renderMessage('uname_missing') }
+                                    { renderMessage('uname_taken') }
+                                    { renderMessage('change_uname_success', 'success') }
+                                </form>
+                            </CollapseComponent>
+                            <CollapseComponent aria_controls='change-email-collapse' button_text='Zmień adres e-mail' button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
+                                <form onSubmit={handleSubmitEmail}>
+                                    <div className='p-2 d-flex flex-row Profile-change-data-container'>
+                                        <input type='text' className='Profile-change-data-input px-2' placeholder='Wprowadź nowy adres e-mail' name='email' />           
+                                        <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm rounded-0'>Dalej</button>
+                                    </div>
+                                    { renderMessage('email_missing') }
+                                    { renderMessage('email_taken') }
+                                    { renderMessage('wrong_email') }
+                                    { renderMessage('change_email_success', 'success') }
+                                </form>
+                            </CollapseComponent>
+                            <CollapseComponent aria_controls='change-pass-collapse'  button_text='Zmień hasło' button_className='w-100 mb-2 rounded-0' collapse_className='mb-3'>
+                                <form onSubmit={handleSubmitPass}>
+                                    <div className='d-flex flex-column'>
+                                        <div className='p-2 d-flex flex-row Profile-change-data-container'>
+                                            <input type='password' className='Profile-change-data-input px-2' placeholder='Wprowadź obecne hasło' name='pass_01' />
+                                            <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm disabled invisible rounded-0'>Dalej</button>
+                                        </div>
+                                        { renderMessage('pass_01_missing') }
+                                        { renderMessage('wrong_pass') }
+                                        <div className='p-2 d-flex flex-row Profile-change-data-container'>
+                                            <input type='password' className='Profile-change-data-input px-2' placeholder='Wprowadź nowe hasło' name='pass_02' />
+                                            <button type='submit' className='Profile-change-data-button btn btn-outline-success btn-sm rounded-0'>Dalej</button>
+                                        </div>
+                                        { renderMessage('pass_02_missing') }
+                                        { renderMessage('pass_too_short') }
+                                        { renderMessage('pass_identical') }
+                                        { renderMessage('change_password_success', 'success') }
+                                    </div>
+                                </form>
+                            </CollapseComponent>
                         </div>
-                        : <span className='text-center p-3 text-muted w-100'>Nie masz jeszcze żadnych znajomych</span>
-                    }
-                    </>            
-                </div>
-                <div className='Profile-table-container d-flex flex-column mb-4'>
-                    <span className='bg-primary p-1 Profile-table-title'>Historia gier</span>
-                    <>
-                    {
-                        user_games.length > 0 ?
-                        <div className='my-2 Profile-table'>
-                            <table className='table table-striped table-hover'>
-                                <thead>
-                                    <tr>
-                                        <th scope='col'></th>
-                                        <th scope='col'>Przeciwnik</th>
-                                        <th scope='col'>Data</th>
-                                        <th scope='col'>Wynik</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {user_games.map((game, index) => {
-                                        return (
-                                            <tr key={'game-' + (index + 1)}>
-                                                <th scope='row'>{index + 1}</th>
-                                                <td>{game.opponent}</td>
-                                                <td>
-                                                    {
-                                                        game.game_date.split('.')[0]
-                                                    }
-                                                </td>
-                                                {
-                                                    game.result === 'Wygrana' ?
-                                                    <td className='text-success Profile-game-result-text'>{game.result}</td> :
-                                                    <td className='text-danger Profile-game-result-text'>{game.result}</td>
-                                                }
+                    </div>           
+                    <div className='d-flex flex-column Profile-tables-container'>
+                        <div className='Profile-table-container d-flex flex-column mb-4'>
+                            <span className='bg-primary p-1 Profile-table-title'>Twoi znajomi</span>
+                            <>
+                            {
+                                user_friends.length > 0 ?
+                                <div className='my-2 Profile-table'>
+                                    <table className='table table-striped table-hover'>
+                                        <thead>
+                                            <tr>
+                                                <th scope='col'></th>
+                                                <th scope='col'>Nazwa użytkownika</th>
+                                                <th scope='col'>Adres e-mail</th>
+                                                <th scope='col' colSpan='2'></th>
                                             </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div> :
-                        <span className='text-center p-3 text-muted w-100'>Brak gier w historii</span>
-                    }
-                    </>
+                                        </thead>
+                                        <tbody>
+                                            {user_friends.map((friend, index) => {
+                                                return (
+                                                    <tr key={'friend-' + (index + 1)}>
+                                                        <th scope='row'>{index + 1}</th>
+                                                        <td>{friend.username}</td>
+                                                        <td>{friend.email}</td>
+                                                        <td>                                            
+                                                            <Tooltip title='Zaproś do gry' placement='top'>
+                                                                <IconButton aria-label='invite' size='small' color='success' className='p-0' onClick={() => handleGameInvite(friend.userId, friend.username)}>
+                                                                    <PlayArrow fontSize='small'/>
+                                                                </IconButton>
+                                                            </Tooltip> 
+                                                        </td>
+                                                        <td>
+                                                            <Tooltip title='Usuń ze znajomych' placement='top'>
+                                                                <IconButton aria-label='delete' size='small' color='error' className='p-0' onClick={() => handleFriendDelete(friend.userId)}>
+                                                                    <ClearIcon fontSize='small'/>
+                                                                </IconButton>
+                                                            </Tooltip>                                    
+                                                        </td>
+                                                    </tr>
+
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                : <span className='text-center p-3 text-muted w-100'>Nie masz jeszcze żadnych znajomych</span>
+                            }
+                            </>            
+                        </div>
+                        <div className='Profile-table-container d-flex flex-column mb-4'>
+                            <span className='bg-primary p-1 Profile-table-title'>Historia gier</span>
+                            <>
+                            {
+                                user_games.length > 0 ?
+                                <div className='my-2 Profile-table'>
+                                    <table className='table table-striped table-hover'>
+                                        <thead>
+                                            <tr>
+                                                <th scope='col'></th>
+                                                <th scope='col'>Przeciwnik</th>
+                                                <th scope='col'>Data</th>
+                                                <th scope='col'>Wynik</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {user_games.map((game, index) => {
+                                                return (
+                                                    <tr key={'game-' + (index + 1)}>
+                                                        <th scope='row'>{index + 1}</th>
+                                                        <td>{game.opponent}</td>
+                                                        <td>
+                                                            {
+                                                                game.game_date.split('.')[0]
+                                                            }
+                                                        </td>
+                                                        {
+                                                            game.result === 'Wygrana' ?
+                                                            <td className='text-success Profile-game-result-text'>{game.result}</td> :
+                                                            <td className='text-danger Profile-game-result-text'>{game.result}</td>
+                                                        }
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div> :
+                                <span className='text-center p-3 text-muted w-100'>Brak gier w historii</span>
+                            }
+                            </>
+                        </div>
+                        <div className='Profile-table-container d-flex flex-column'>
+                            <span className='bg-primary p-1 Profile-table-title'>Szukaj osób</span>
+                            <form onSubmit={handleSubmitSearch}>
+                                <div className='Profile-search-container d-flex flex-row p-3 border-bottom'>
+                                    <input type='text' className='Profile-search-input px-2' placeholder='Szukaj osób' name='search' />
+                                    <button type='submit' className='Profile-search-button btn btn-outline-success btn-sm rounded-0'>
+                                        <FontAwesomeIcon icon={faMagnifyingGlass} />
+                                        {' '}Szukaj
+                                    </button>
+                                </div>
+                            </form>
+                            {
+                                user_potential_friends.length > 0 ?
+                                <div className='my-2 Profile-table'>
+                                    <table className='table table-striped table-hover'>
+                                        <thead>
+                                            <tr>
+                                                <th scope='col'></th>
+                                                <th scope='col'>Nazwa użytkownika</th>
+                                                <th scope='col'>Adres e-mail</th>
+                                                <th scope='col'></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {user_potential_friends.sort((a, b) => {
+                                                return a[2] === b[2] ? 0 : a[2] ? -1 : 1;
+                                            }).map((potential_friend, index) => {
+                                                return (
+                                                    <tr key={'potential-friend-' + (index + 1)}>
+                                                        <th scope='row'>{index + 1}</th>
+                                                        <td>{potential_friend.username}</td>
+                                                        <td>{potential_friend.email}</td>    
+                                                        <td>
+                                                            <Tooltip title='Zaproś do znajomych' placement='top'>        
+                                                                <span>
+                                                                    <IconButton aria-label='invite' size='small' color='success' className='p-0' onClick={() => handleFriendInvite(index, potential_friend.userId)} disabled={potential_friend.disabled}>
+                                                                        <AddIcon fontSize='small'/>
+                                                                    </IconButton>
+                                                                </span>
+                                                            </Tooltip>
+                                                        </td>                    
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div> : 
+                                <span className='text-center p-3 text-muted w-100'>Nie znaleziono żadnych osób</span>
+                            }
+                        </div>
+                    </div> 
                 </div>
-                <div className='Profile-table-container d-flex flex-column'>
-                    <span className='bg-primary p-1 Profile-table-title'>Szukaj osób</span>
-                    <form onSubmit={handleSubmitSearch}>
-                        <div className='Profile-search-container d-flex flex-row p-3 border-bottom'>
-                            <input type='text' className='Profile-search-input px-2' placeholder='Szukaj osób' name='search' />
-                            <button type='submit' className='Profile-search-button btn btn-outline-success btn-sm rounded-0'>
-                                <FontAwesomeIcon icon={faMagnifyingGlass} />
-                                {' '}Szukaj
+            </div>
+            { 
+                localStorage.getItem('logout_during_game') === 'true' ?
+                <div className='Profile-info-layer'>
+                    <div className='Profile-info text-center'>
+                        <p>
+                            Wylogowanie się podczas trwającej gry spowoduje jej zakończenie i uznanie za przegraną.
+                            Czy chcesz kontynuować?
+                        </p>
+                        <div className='d-flex flex-row justify-content-center'>
+                            <button className='btn btn-success rounded-0 px-3 mb-2 mx-2' onClick={handleLogoutDuringGame}>
+                                Tak
+                            </button>
+                            <button className='btn btn-danger rounded-0 px-3 mb-2 mx-2' onClick={() => logOutCancel()}>
+                                Nie
                             </button>
                         </div>
-                    </form>
-                    {
-                        user_potential_friends.length > 0 ?
-                        <div className='my-2 Profile-table'>
-                            <table className='table table-striped table-hover'>
-                                <thead>
-                                    <tr>
-                                        <th scope='col'></th>
-                                        <th scope='col'>Nazwa użytkownika</th>
-                                        <th scope='col'>Adres e-mail</th>
-                                        <th scope='col'></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {user_potential_friends.sort((a, b) => {
-                                        return a[2] === b[2] ? 0 : a[2] ? -1 : 1;
-                                    }).map((potential_friend, index) => {
-                                        return (
-                                            <tr key={'potential-friend-' + (index + 1)}>
-                                                <th scope='row'>{index + 1}</th>
-                                                <td>{potential_friend.username}</td>
-                                                <td>{potential_friend.email}</td>    
-                                                <td>
-                                                    <Tooltip title='Zaproś do znajomych' placement='top'>        
-                                                        <span>
-                                                            <IconButton aria-label='invite' size='small' color='success' className='p-0' onClick={() => handleFriendInvite(index, potential_friend.userId)} disabled={potential_friend.disabled}>
-                                                                <AddIcon fontSize='small'/>
-                                                            </IconButton>
-                                                        </span>
-                                                    </Tooltip>
-                                                </td>                    
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div> : 
-                        <span className='text-center p-3 text-muted w-100'>Nie znaleziono żadnych osób</span>
-                    }
-                </div>
-            </div> 
+                    </div>    
+                </div> 
+                :
+                localStorage.getItem('logout_during_prep') === 'true' ?
+                <div className='Profile-info-layer'>
+                    <div className='Profile-info text-center'>
+                        <p>
+                            Wylogowanie się podczas przygotowania do gry spowoduje jej anulowanie.
+                            Czy chcesz kontynuować?
+                        </p>
+                        <div className='d-flex flex-row justify-content-center'>
+                            <button className='btn btn-success rounded-0 px-3 mb-2 mx-2' onClick={handleLogoutDuringPrep}>
+                                Tak
+                            </button>
+                            <button className='btn btn-danger rounded-0 px-3 mb-2 mx-2' onClick={() => logOutCancel()}>
+                                Nie
+                            </button>
+                        </div>
+                    </div>    
+                </div> 
+                :
+                localStorage.getItem('opponent') ?
+                <div className='Profile-info-layer'>
+                    <div className='Profile-info'>
+                        <p>
+                            Jesteś obecnie w trakcie gry z użytkownikiem <i>{localStorage.getItem('opponent')}</i>.
+                        </p>
+                        <p>
+                            <a href='/game'>Przejdź do gry</a>
+                        </p>
+                    </div>
+                </div> 
+                : ''
+            }
         </div>
     );
 }

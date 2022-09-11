@@ -1,3 +1,5 @@
+import { BOARD_SIZE } from "./constants";
+
 const getRandomInt = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -38,10 +40,14 @@ const clearGameData = () => {
     localStorage.removeItem('opponent_ready');
     localStorage.removeItem('yout_hits');
     localStorage.removeItem('opponent_hits');
-    localStorage.removeItem('board_map');
-    localStorage.removeItem('your_hits_map');
-    localStorage.removeItem('opponent_hits_map');
     localStorage.removeItem('ships_set');
+    localStorage.removeItem('current_time');
+    localStorage.removeItem('logout_during_game');
+    localStorage.removeItem('logout_during_prep');
+
+    localStorage.setItem('board_map', JSON.stringify(prepareBoardMap(BOARD_SIZE)));
+    localStorage.setItem('your_hits_map', JSON.stringify(prepareBoardMap(BOARD_SIZE)));
+    localStorage.setItem('opponent_hits_map', JSON.stringify(prepareBoardMap(BOARD_SIZE)));    
 }
 
 const switchNavLink = (nav_link) => {

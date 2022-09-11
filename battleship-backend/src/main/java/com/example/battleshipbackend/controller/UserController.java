@@ -214,20 +214,33 @@ public class UserController {
             Long fromUser = JWTUtils.getIdFromJWT(jwt);
             String notificationType = notification.getType();
 
+            List<Notification> notifications = notificationService.checkIfNotificationExists(userId, fromUser, notificationType);
+
+            if (notifications.size() > 1) {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            if (notifications.size() == 1) {
+                Notification _notification = notifications.get(0);
+
+                _notification.setNotificationDate(new Timestamp((new Date()).getTime()));
+                notificationService.addNotification(_notification);
+
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+
             Boolean relationExists = userRelationService.checkIfRelationExists(userId, fromUser).size() > 0;
-            Boolean notificationExists = notificationService.checkIfNotificationExists(userId, fromUser, notificationType).size() > 0;
 
             if (notificationType.equals("invite-friend")) {
-                if (!notificationExists && !relationExists) {
+                if (!relationExists) {
                     notificationService.addNotification(new Notification(userId, fromUser, new Timestamp((new Date()).getTime()), notification.getType()));
                 }
             } else if (notificationType.equals("invite-game")) {
                 if (!relationExists) {
                     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                 }
-                if (!notificationExists) {
-                    notificationService.addNotification(new Notification(userId, fromUser, new Timestamp((new Date()).getTime()), notification.getType()));
-                }
+
+                notificationService.addNotification(new Notification(userId, fromUser, new Timestamp((new Date()).getTime()), notification.getType()));
             }
 
             return new ResponseEntity<>(HttpStatus.OK);
@@ -273,6 +286,21 @@ public class UserController {
             }
 
             notificationService.deleteNotification(notificationId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping(path = "/deleteNotificationByUsersData/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<HttpStatus> deleteNotificationByUsersData(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, @PathVariable String username) {
+        try {
+            String jwt = authorizationHeader.replace("Bearer ", "");
+            if (!JWTUtils.validateJWT(jwt)) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+
+            notificationService.deleteNotificationByUsersData(userService.getUserByUsername(username).getUserId(), JWTUtils.getIdFromJWT(jwt));
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

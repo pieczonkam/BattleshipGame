@@ -28,4 +28,9 @@ public interface NotificationRepository extends CrudRepository<Notification, Lon
     @Transactional
     @Query(value = "DELETE FROM users_notifications WHERE (user_id = ?1 AND from_user = ?2) OR (user_id = ?2 AND from_user = ?1)", nativeQuery = true)
     void deleteNotifications(Long userId, Long fromUser);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM users_notifications WHERE user_id = ?1 AND from_user = ?2", nativeQuery = true)
+    void deleteNotificationByUsersData(Long userId, Long fromUser);
 }

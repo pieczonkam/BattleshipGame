@@ -3,9 +3,6 @@ package com.example.battleshipbackend.utils;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 
-import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
-import java.security.Key;
 import java.util.Date;
 
 public class JWTUtils {

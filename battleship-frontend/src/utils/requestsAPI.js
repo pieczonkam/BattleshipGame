@@ -192,6 +192,20 @@ const deleteNotificationRequest = async (jwt, notification_id) => {
     }
 }
 
+const deleteNotificationByUsersDataRequest = async (jwt, username) => {
+    try {
+        const response = await axios.delete(API_URL + '/users/deleteNotificationByUsersData/' + username, {
+            headers: {
+                'Authorization': 'Bearer ' + jwt
+            }
+        });
+
+        return response.status;
+    } catch (error) {
+        return error.response.status
+    }
+}
+
 const addFriendRequest = async (jwt, user_relation_data) => {
     try {
         const response = await axios.post(API_URL + '/users/addFriend',
@@ -221,7 +235,23 @@ const deleteFriendRequest = async (jwt, friend_id) => {
     }
 }
 
+const addGameRequest = async (jwt, game_data) => {
+    try {
+        const response = await axios.post(API_URL + '/games/saveGame',
+            game_data,
+            { headers: {
+                'Authorization': 'Bearer ' + jwt
+            }}
+        );
+
+        return response.status;
+    } catch (error) {
+        return error.response.status;
+    }
+}
+
 export { registerRequest, loginRequest, jwtValidRequest, userDataRequest, userFriendsRequest, 
         userPotentialFriendsRequest, userGamesRequest, changeEmailRequest, changeUsernameRequest, 
         checkPasswordRequest, changePasswordRequest, addNotificationRequest, getNotificationsRequest,
-        deleteNotificationRequest, addFriendRequest, deleteFriendRequest }
+        deleteNotificationRequest, deleteNotificationByUsersDataRequest, addFriendRequest, 
+        deleteFriendRequest, addGameRequest }

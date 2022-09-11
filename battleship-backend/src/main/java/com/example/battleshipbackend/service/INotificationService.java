@@ -10,6 +10,7 @@ public interface INotificationService {
     Notification addNotification(Notification notification);
     void deleteNotification(Long id);
     void deleteNotifications(Long userId, Long fromUser);
+    void deleteNotificationByUsersData(Long userId, Long fromUser);
     List<Tuple> getNotificationsByUserId(Long userId);
     List<Notification> checkIfNotificationExists(Long userId, Long fromUser, String type);
 }

@@ -13,10 +13,29 @@ const setLoginData = async (jwt) => {
     }
 }
 
-const logOut = () => {
-    localStorage.removeItem('jwt');
-    localStorage.removeItem('username')
-    clearGameData();
+const logOut = (forced=false) => {
+    if (!forced) {
+        if (localStorage.getItem('game_started')) {
+            localStorage.setItem('logout_during_game', 'true');
+        } else if (localStorage.getItem('opponent')) {
+            localStorage.setItem('logout_during_prep', 'true');
+        } else {
+            localStorage.removeItem('jwt');
+            localStorage.removeItem('username');
+            clearGameData();
+        }
+    } else {
+        localStorage.removeItem('jwt');
+        localStorage.removeItem('username');
+        clearGameData();
+    }
+
+    window.location.reload(false);
+}
+
+const logOutCancel = () => {
+    localStorage.setItem('logout_during_game', 'false');
+    localStorage.setItem('logout_during_prep', 'false');
     window.location.reload(false);
 }
 
@@ -37,4 +56,4 @@ const isLoggedIn = async () => {
     return false;
 }
 
-export { setLoginData, logOut, isLoggedIn }
+export { setLoginData, logOut, logOutCancel, isLoggedIn }

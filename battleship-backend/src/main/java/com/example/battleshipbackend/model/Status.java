@@ -1,10 +1,12 @@
 package com.example.battleshipbackend.model;
 
 public enum Status {
-    JOIN,
+    ACCEPT,
+    DECLINE,
+    CANCEL,
     READY,
+    SURRENDER,
+    TIME,
     COORDINATES,
     HIT,
-    MESSAGE,
-    LEAVE
 }

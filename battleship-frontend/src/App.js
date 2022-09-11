@@ -22,69 +22,149 @@ var stomp_client = null;
 function App() {  
     const navigate = useNavigate();
 
-    const [logged_in, setLoggedIn]           = useState(null);
-    const [message_status, setMessageStatus] = useState('')
-    
+    const [logged_in, setLoggedIn]                      = useState(null);
+    const [game_invite_declined, setGameInviteDeclined] = useState(false);
+    const [game_cancel, setGameCancel]                  = useState(false);
+    const [opponent_surrender, setOpponentSurrender]    = useState(false);
+    const [connection_lost, setConnectionLost]          = useState(false);
+    const [game_started, setGameStarted]                = useState(localStorage.getItem('game_started') === 'true' ? true : false);
+    const [opponent_ready, setOpponentReady]            = useState(localStorage.getItem('opponent_ready') === 'true' ? true : false);
+    const [current_time, setCurrentTime]                = useState(localStorage.getItem('current_time') ? localStorage.getItem('current_time') : (new Date()).getTime());
+    const [your_move, setYourMove]                      = useState(localStorage.getItem('your_move') === 'true' ? true : false);
+
     const getWsMessage = (payload) => {
+        const message  = JSON.parse(payload.body);
         const opponent = localStorage.getItem('opponent');
 
-        if (!opponent) {
-            clearGameData();
-            navigate('/profile');
-        } else {
-            const message = JSON.parse(payload.body);
+        console.log('Printing message');
+        console.log(message.status);
+        console.log(message.message);
+        console.log(message.receiverName);
+        console.log(message.senderName);
 
-            if (message.status === 'READY') {
-                localStorage.setItem('opponent_ready', 'true');
-            }
-
-            if (localStorage.getItem('you_ready') === 'true' && localStorage.getItem('opponent_ready') === 'true') {
-                console.log('Game started');
-            }
-
-            if (message.status === 'HIT') {
-                var your_hits_map = JSON.parse(localStorage.getItem('your_hits_map'));
-                if (!your_hits_map) {
-                    your_hits_map = prepareBoardMap(BOARD_SIZE);
+        switch (message.status) {
+            case 'DECLINE':
+                if (opponent) {
+                    setGameInviteDeclined(true);
                 }
+                break;
 
-                // coord_x coord_y true/false
-                var x      = parseInt(message.message.split(' ')[0]);
-                var y      = parseInt(message.message.split(' ')[1]);
-                var result = message.message.split(' ')[2];
-
-                if (result === 'true') {
-                    your_hits_map[x][y] = 2;
+            case 'CANCEL':
+                if (opponent) {
+                    setGameCancel(true);
                 } else {
-                    your_hits_map[x][y] = 1;
+                    window.location.reload(false);
                 }
+                break;
 
-                localStorage.setItem('your_hits_map', JSON.stringify(your_hits_map));
-            }
+            case 'SURRENDER':
+                if (opponent) {
+                    setOpponentSurrender(true);
+                }
+                else {
+                    clearGameData();
+                    navigate('/profile');
+                }
+                break;
 
-            if (message.status === 'COORDINATES') {
-                var x = parseInt(message.message.split(' ')[0]);
-                var y = parseInt(message.message.split(' ')[1]);
+            case 'ACCEPT':
+                if (opponent !== message.senderName) {
+                    sendWsMessage(message.senderName, '', 'CANCEL');
+                }
+                break;
 
-                var board_map = JSON.parse(localStorage.getItem('board_map'));
-                if (board_map) {
-                    if (board_map[x][y] === 2) {
-                        sendWsMessage(opponent, String(x + ' ' + y + ' true'), 'HIT');
-                        setMessageStatus('HIT');
-                    } else {
-                        sendWsMessage(opponent, String(x + ' ' + y + ' false'), 'HIT');
-                        setMessageStatus('MISS');
+            case 'READY':
+                if (opponent) {
+                    let move_order = parseInt(message.message);
+
+                    setOpponentReady(true);
+                    localStorage.setItem('opponent_ready', 'true');
+
+                    if (!localStorage.getItem('your_move')) {
+                        if (move_order === 1) {
+                            localStorage.setItem('your_move', 'false');
+                            setYourMove(false);
+                        } else {
+                            localStorage.setItem('your_move', 'true');
+                            setYourMove(true);
+                        }
                     }
+
+                    if (localStorage.getItem('you_ready') === 'true' && localStorage.getItem('opponent_ready') === 'true') {
+                        localStorage.setItem('game_started', 'true');
+                        setGameStarted(true);
+                    }
+                } else {
+                    clearGameData();
+                    navigate('/profile');
                 }
-            } else {
-                setMessageStatus(message.status);
-            }
+                break;
+            
+            case 'TIME':
+                var ct = JSON.parse(message.message);
+                setCurrentTime(ct);
+                localStorage.setItem('current_time', String(ct));
+                break;
 
-            setTimeout(() => {
-                setMessageStatus('')
-            }, 1000);
+            case 'HIT':
+                if (opponent) {
+                    let x      = parseInt(message.message.split(' ')[0]);
+                    let y      = parseInt(message.message.split(' ')[1]);
+                    let result = message.message.split(' ')[2];
 
-            console.log(message.message);
+                    var your_hits_map = JSON.parse(localStorage.getItem('your_hits_map'));
+                    if (!your_hits_map) {
+                        your_hits_map = prepareBoardMap(BOARD_SIZE);
+                    }
+
+                    if (result === 'true') {
+                        your_hits_map[x][y] = 2;
+                    } else {
+                        your_hits_map[x][y] = 1;
+                    }
+
+                    localStorage.setItem('your_hits_map', JSON.stringify(your_hits_map));
+                } else {
+                    clearGameData();
+                    navigate('/profile');
+                }
+                
+                break;
+
+            case 'COORDINATES':
+                if (opponent) {
+                    setYourMove(true);
+                    localStorage.setItem('your_move', 'true');
+
+                    let x = parseInt(message.message.split(' ')[0]);
+                    let y = parseInt(message.message.split(' ')[1]);
+
+                    var board_map         = JSON.parse(localStorage.getItem('board_map'));
+                    var opponent_hits_map = JSON.parse(localStorage.getItem('opponent_hits_map')); 
+                    if (!board_map) {
+                        board_map = prepareBoardMap(BOARD_SIZE);
+                    }
+                    if (!opponent_hits_map) {
+                        opponent_hits_map = prepareBoardMap(BOARD_SIZE);
+                    }
+
+                    if (board_map[x][y] === 2) {
+                        opponent_hits_map[x][y] = 2;
+                        sendWsMessage(opponent, String(x + ' ' + y + ' true'), 'HIT');
+                    } else {
+                        opponent_hits_map[x][y] = 1;
+                        sendWsMessage(opponent, String(x + ' ' + y + ' false'), 'HIT');
+                    }
+
+                    localStorage.setItem('opponent_hits_map', JSON.stringify(opponent_hits_map));
+                } else {
+                    clearGameData();
+                    navigate('/profile');
+                }
+                break;
+
+            default:
+                break;
         }
     }
 
@@ -109,7 +189,7 @@ function App() {
         const wsConnect = () => {
             let sock = new SockJS(API_URL + '/ws');
             stomp_client = over(sock);
-            stomp_client.debug = null;
+            // stomp_client.debug = null;
             stomp_client.connect({}, onConnect, onError);
         }
     
@@ -124,8 +204,7 @@ function App() {
         }
     
         const onError = (err) => {
-            console.log('WebSocket error:');
-            console.log(err);
+            setTimeout(() => setConnectionLost(true), 200);
         }
 
         const checkLoggedIn = async () => {
@@ -160,10 +239,10 @@ function App() {
                     <NavigationBar logged_in={logged_in}/>            
                     <Routes>
                         <Route path='/'         element={logged_in  ? <Navigate to='/profile' replace /> : <Navigate to='/login' replace />} />
-                        <Route path='/game'     element={logged_in  ? <Game sendWsMessage={sendWsMessage} message_status={message_status} /> : <Navigate to='/login' replace />} />
+                        <Route path='/game'     element={logged_in  ? <Game sendWsMessage={sendWsMessage} game_started={game_started} setGameStarted={setGameStarted} game_invite_declined={game_invite_declined} setGameInviteDeclined={setGameInviteDeclined} game_cancel={game_cancel} setGameCancel={setGameCancel} opponent_surrender={opponent_surrender} setOpponentSurrender={setOpponentSurrender} opponent_ready={opponent_ready} current_time={current_time} setCurrentTime={setCurrentTime} connection_lost={connection_lost} setConnectionLost={setConnectionLost} your_move={your_move} setYourMove={setYourMove} /> : <Navigate to='/login' replace />} />
                         <Route path='/login'    element={!logged_in ? <Login /> : <Navigate to='/profile' replace />} />
                         <Route path='/register' element={!logged_in ? <Register /> : <Navigate to='/profile' replace />} />
-                        <Route path='/profile'  element={logged_in  ? <Profile /> : <Navigate to='/login' replace />} />
+                        <Route path='/profile'  element={logged_in  ? <Profile sendWsMessage={sendWsMessage} /> : <Navigate to='/login' replace />} />
                         <Route path='/chatRoom' element={logged_in  ? <ChatRoom /> : <Navigate to='/login' replace />} />
                         <Route path='*'         element={<Navigate to='/' replace />} />
                     </Routes>

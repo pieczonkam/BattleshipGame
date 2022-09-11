@@ -4,29 +4,36 @@ import { FontAwesomeIcon }            from '@fortawesome/react-fontawesome';
 import { faRotate,
         faRotateRight,
         faPlay,
-        faFlag }                      from '@fortawesome/free-solid-svg-icons';
+        faFlag,
+        faArrowRightToBracket,
+        faCheck }                     from '@fortawesome/free-solid-svg-icons';
 import { Tooltip, Button }            from '@mui/material';
 
 import ShipsContainer                 from './ShipsContainer';
 import Ship                           from './Ship';
 import BoardTile                      from './BoardTile';
+import Timer                          from './Timer';
 
 import { BOARD_SIZE }                 from '../../utils/constants';
 import { clearGameData, 
+        getRandomInt, 
         prepareBoardMap }             from '../../utils/utils';
 import { switchNavLink }              from '../../utils/utils';
+import { logOut, logOutCancel}        from '../../utils/utilsAPI';
+import { addGameRequest, deleteNotificationByUsersDataRequest } from '../../utils/requestsAPI';
 
 function Game(props) {
     const [ships_vertical_state, setShipsVerticalState] = useState(false);
     const [drag_over_update, setDragOverUpdate]         = useState(true);
     const [ships_horizontal, setShipsHorizontal]        = useState([]);
     const [ships_vertical, setShipsVertical]            = useState([]);
+    const [ships_sunk, setShipsSunk]                    = useState([]);
     const [ships_on_board, setShipsOnBoard]             = useState([]);
     const [all_ships_placed, setAllShipsPlaced]         = useState(null);
     const [surrender_screen, setSurrenderScreen]        = useState(false);
+    const [leave_game_screen, setLeaveGameScreen]       = useState(false);
     const [not_your_move_screen, setNotYourMoveScreen]  = useState(false);
     const [game_over, setGameOver]                      = useState(false);
-    const [game_started, setGameStarted]                = useState(localStorage.getItem('game_started') === 'true' ? true : false);
     const [winner, setWinner]                           = useState(1);
 
     const navigate = useNavigate();
@@ -90,16 +97,19 @@ function Game(props) {
             setShipsVertical(ships_vertical_arr);
             setShipsOnBoard(ships_on_board_arr);
             localStorage.setItem('board_map', JSON.stringify(board_map));
+
+            var ships_sunk_arr = [
+                                    <div key='1' className='Game-ship-set ship-3-horizontal'></div>,
+                                    <div key='2' className='Game-ship-set ship-4-horizontal'></div>
+                                ]
+
+            setShipsSunk(ships_sunk_arr);
         }
     
         setShipsUE();
         switchNavLink('navlink-1');
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    useEffect(() => {
-        console.log('Message status changed');
-    }, [props.message_status]);
 
     const getBoard = (type) => {
         var board_tiles_arr = [];
@@ -118,7 +128,7 @@ function Game(props) {
                         board_tiles_row.push(<BoardTile type={type} x={i} y={j} key={'board-' + type + '-' + (i) + '-' + (j)} drag_over_update={drag_over_update} setDragOverUpdate={setDragOverUpdate} sendWsMessage={props.sendWsMessage}></BoardTile>);
                     }
                 } else {
-                    board_tiles_row.push(<BoardTile type={type} x={i} y={j} key={'board-' + type + '-' + (i) + '-' + (j)} sendWsMessage={props.sendWsMessage}></BoardTile>);
+                    board_tiles_row.push(<BoardTile type={type} x={i} y={j} key={'board-' + type + '-' + (i) + '-' + (j)} sendWsMessage={props.sendWsMessage} setNotYourMoveScreen={setNotYourMoveScreen} your_move={props.your_move} setYourMove={props.setYourMove} current_time={props.current_time} setCurrentTime={props.setCurrentTime}></BoardTile>);
                 }
             }
 
@@ -135,12 +145,30 @@ function Game(props) {
             if (document.getElementById('ships-container').childNodes.length > 0) {
                 setAllShipsPlaced(false);
             } else {
-                props.sendWsMessage(opponent, '', 'READY');
+                let move_order = getRandomInt(1, 3);
+                if (!localStorage.getItem('your_move')) {
+                    if (move_order === 1) {
+                        localStorage.setItem('your_move', 'true');
+                        props.setYourMove(true);
+                    } else {
+                        localStorage.setItem('your_move', 'false');
+                        props.setYourMove(false);
+                    }
+                }
+                
                 localStorage.setItem('you_ready', 'true');
+                props.sendWsMessage(opponent, JSON.stringify(move_order), 'READY');
+                
+                if (localStorage.getItem('you_ready') === 'true' && localStorage.getItem('opponent_ready') === 'true') {
+                    let ct = (new Date()).getTime();
 
-                localStorage.setItem('your_move', 'true');
-                localStorage.setItem('game_started', 'true');
-                setGameStarted(true);
+                    props.sendWsMessage(opponent, JSON.stringify(ct), 'TIME');
+                    props.setCurrentTime(ct);
+                    localStorage.setItem('current_time', String(ct));
+                    
+                    localStorage.setItem('game_started', 'true');
+                    props.setGameStarted(true);
+                }
             }
         } else {
             clearGameData();
@@ -148,11 +176,38 @@ function Game(props) {
         }
     }
 
-    const surrender = () => {
-        // Info dla drugiego gracza
-        // Zresetowanie ustawień gry
-        // Zapisanie gry w historii
+    const leaveGame = async () => {
+        var opponent = localStorage.getItem('opponent');
+        if (opponent) {
+            const status = await deleteNotificationByUsersDataRequest(localStorage.getItem('jwt'), opponent);
 
+            if (status !== 200) {
+                logOut();
+            }
+
+            props.sendWsMessage(opponent, '', 'CANCEL');
+        }
+        
+        clearGameData();
+        navigate('/profile');
+    }
+
+    const surrender = async () => {
+        var opponent = localStorage.getItem('opponent');
+        var username = localStorage.getItem('username');
+
+        if (opponent) {
+            props.sendWsMessage(opponent, '', 'SURRENDER');
+
+            if (username) {
+                await addGameRequest(localStorage.getItem('jwt'), {
+                    username1: opponent, 
+                    username2: username 
+                });
+            }
+        }
+        
+        props.setGameStarted(false);
         clearGameData();
         navigate('/profile');
     }
@@ -165,13 +220,66 @@ function Game(props) {
         window.location.reload(false);
     }
 
+    const handleGameInviteDeclined = () => {
+        props.setGameInviteDeclined(false);
+        clearGameData();
+        navigate('/profile');
+    }
+
+    const cancelGame = () => {
+        props.setGameCancel(false);
+        clearGameData();
+        navigate('/profile');
+    }
+
+    const handleOpponentSurrender = () => {
+        props.setOpponentSurrender(false);
+        props.setGameStarted(false);
+        clearGameData();
+        navigate('/profile');
+    }
+
+    const handleConnectionLost = () => {
+        props.setConnectionLost(false);
+        clearGameData();
+        navigate('/profile');
+    }
+
+    const handleLogoutDuringGame = async () => {
+        var opponent = localStorage.getItem('opponent');
+        var username = localStorage.getItem('username');
+
+        if (opponent) {
+            props.sendWsMessage(opponent, '', 'SURRENDER');
+
+            if (username) {
+                await addGameRequest(localStorage.getItem('jwt'), {
+                    username1: opponent, 
+                    username2: username 
+                });
+            }
+        }
+        
+        logOut(true);
+    }
+
+    const handleLogoutDuringPrep = async () => {
+        var opponent = localStorage.getItem('opponent');
+        if (opponent) {
+            await deleteNotificationByUsersDataRequest(localStorage.getItem('jwt'), opponent);
+            props.sendWsMessage(opponent, '', 'CANCEL');
+        }
+        
+        logOut(true);
+    }
+
     return (
             <div className='Game-layers-container'>
                 <div className='Game-content-layer'>
                     <div className='d-flex flex-column align-items-center'>
                         <div className='Game-container my-2'>
                             <div className='Game-board-a d-flex flex-column align-items-center text-bold'>
-                                <span className='Game-board-title'>Twoje statki "{props.message_status}"</span>
+                                <span className='Game-board-title'>Twoje statki</span>
                                 <div className='Game-board-a-outer'>
                                     <div className='Game-board-a-inner-bottom'>
                                         {getBoard('a-bg')}
@@ -183,8 +291,20 @@ function Game(props) {
                             </div>
                             <div className='Game-board-b d-flex flex-column align-items-center text-bold'>
                                 <span>
+                                    {
+                                        !props.game_started && props.opponent_ready && localStorage.getItem('opponent_ready') === 'true' ? 
+                                        <>
+                                            <FontAwesomeIcon icon={faCheck} className='text-success'/> 
+                                            {' '}
+                                        </>
+                                        : ''
+                                    }
                                     <span className='Game-board-title'>Statki przeciwnika</span>
-                                    <span className='Game-board-title-nickname'> ({localStorage.getItem('opponent')  ? localStorage.getItem('opponent') : ''})</span>
+                                    <span className='Game-board-title-nickname'> 
+                                    {
+                                        localStorage.getItem('opponent')  ? ' (' + localStorage.getItem('opponent') + ')' : ''
+                                    }
+                                    </span>
                                 </span>
                                 <div className='Game-board-b-outer'>
                                     {getBoard('b')}
@@ -192,7 +312,7 @@ function Game(props) {
                             </div>
                         </div>
                         {
-                            !game_started ?
+                            !props.game_started ?
                             <>
                                  <span className='px-2 pt-2 pb-1'>
                                     <Tooltip title=
@@ -200,8 +320,8 @@ function Game(props) {
                                             Przeciągnij statki z dolnego panelu na planszę <b>Twoje statki</b>.
                                             <br/><br/>Możesz obrócić statki w panelu klikając na przycisk <b><FontAwesomeIcon icon={faRotate}/> Obróć statki</b>.
                                             <br/><br/>Wciśnij <b><FontAwesomeIcon icon={faPlay}/> Start</b> aby rozpocząć grę.
-                                            <br/><br/>Znajdź statki przeciwnika, klikając na pola na planszy <b>Statki przeciwnika</b>.
                                             <br/><br/>Aby zresetować pozycje statków, kliknij przycisk <b><FontAwesomeIcon icon={faRotateRight}/> Reset</b>.
+                                            <br/><br/>Znajdź statki przeciwnika, klikając na pola na planszy <b>Statki przeciwnika</b>.
                                         </p>}
                                     placement='top'>
                                         <Button>
@@ -209,16 +329,20 @@ function Game(props) {
                                         </Button>
                                     </Tooltip>
                                 </span>
-                                <div className='d-flex flex-row'>
-                                    <button className='Game-button-short btn btn-primary mx-1 rounded-0' onClick={() => setShipsVerticalState(!ships_vertical_state)}>
+                                <div className='d-flex flex-column flex-md-row align-items-center'>
+                                    <button className='Game-button-short btn btn-primary m-1 rounded-0' onClick={() => setShipsVerticalState(!ships_vertical_state)}>
                                         <FontAwesomeIcon icon={faRotate}/>
                                         {' '}Obróć statki
                                     </button>
-                                    <button className='Game-button-long btn btn-success mx-1 rounded-0' onClick={startGame}>
+                                    <button className='Game-button-long btn btn-success m-1 rounded-0' onClick={startGame}>
                                         <FontAwesomeIcon icon={faPlay}/>
                                         {' '}Start
+                                    </button>
+                                    <button className='Game-button-long btn btn-danger m-1 rounded-0' onClick={() => setLeaveGameScreen(true)}>
+                                        <FontAwesomeIcon icon={faArrowRightToBracket} flip='horizontal'/>
+                                        {' '}Wyjdź
                                     </button>    
-                                    <button className='Game-button-short btn btn-primary mx-1 rounded-0' onClick={resetShips}>
+                                    <button className='Game-button-short btn btn-primary m-1 rounded-0' onClick={resetShips}>
                                         <FontAwesomeIcon icon={faRotateRight}/>
                                         {' '}Reset
                                     </button>
@@ -242,21 +366,27 @@ function Game(props) {
                                 }
                             </> :
                             <>
-                                {
-                                    localStorage.getItem('your_move') === 'true' ?
-                                    <div>Twój ruch</div> :
-                                    <div>Ruch przeciwnika</div>
-                                }
-                                <div className='d-flex flex-row'>
-                                    <button className='Game-button-long btn btn-danger mx-1 rounded-0' onClick={() => setSurrenderScreen(true)}>
+                                <div className='d-flex flex-row pt-3'>
+                                    <Timer className='Game-timer' minutes={1} seconds={30} current_time={props.current_time} stop_time={props.opponent_surrender}/>
+                                    <button className='Game-button-long btn btn-danger rounded-0' onClick={() => setSurrenderScreen(true)}>
                                         <FontAwesomeIcon icon={faFlag}/>
                                         {' '}Poddaj się
                                     </button>
+                                    <span className='Game-move-info bg-primary'>
+                                    {
+                                        props.your_move ?
+                                        'Twój ruch' : 'Ruch przeciwnika'
+                                    }
+                                    </span>
                                 </div>
-                                <ShipsContainer title='Zatopione statki' id='ships-set-container' className='Game-ships-container-horizontal'>
-                                    <Ship className='Game-ship-set ship-3-horizontal' />
-                                    <Ship className='Game-ship-set ship-4-horizontal' />
-                                </ShipsContainer>
+                                <span className='Game-ships-container-horizontal-title'>Zatopione statki:</span>
+                                <div className='Game-ships-container-horizontal-with-title'>
+                                {
+                                    ships_sunk.map(ship => {
+                                        return(ship);
+                                    })
+                                }
+                                </div>
                             </>
                         }  
                     </div>
@@ -266,20 +396,69 @@ function Game(props) {
                     <div className='Game-info-layer'>
                         <div className='Game-info'>
                             <p>
-                                Aby zagrać w Statki Online, zaproś znajomego do gry
+                                Aby zagrać w Statki Online, zaproś znajomego do gry.
                             </p>
                             <p>
                                 <a href='/profile'>Przejdź do zakładki profil</a>
                             </p>
                         </div>
-                    </div> : ''
-                }
-                {
+                    </div>
+                    :
+                    localStorage.getItem('opponent') && props.connection_lost ? 
+                    <div className='Game-info-layer'>
+                        <div className='Game-info text-center'>
+                            <p>
+                                Połączenie z drugim graczem zostało zerwane.
+                            </p>
+                            <div className='d-flex flex-row justify-content-center'>
+                                <button className='btn btn-success rounded-0 px-3 mb-2 mx-2' onClick={handleConnectionLost}>
+                                    OK
+                                </button>
+                            </div>
+                        </div>    
+                    </div> 
+                    :
+                    localStorage.getItem('logout_during_game') === 'true' ?
+                    <div className='Game-info-layer'>
+                        <div className='Game-info text-center'>
+                                <p>
+                                    Wylogowanie się podczas trwającej gry spowoduje jej zakończenie i uznanie za przegraną.
+                                    Czy chcesz kontynuować?
+                                </p>
+                                <div className='d-flex flex-row justify-content-center'>
+                                    <button className='btn btn-success rounded-0 px-3 mb-2 mx-2' onClick={handleLogoutDuringGame}>
+                                        Tak
+                                    </button>
+                                    <button className='btn btn-danger rounded-0 px-3 mb-2 mx-2' onClick={() => logOutCancel()}>
+                                        Nie
+                                    </button>
+                                </div>
+                        </div>    
+                    </div>
+                    :
+                    localStorage.getItem('logout_during_prep') === 'true' ?
+                    <div className='Game-info-layer'>
+                        <div className='Game-info text-center'>
+                            <p>
+                                Wylogowanie się podczas przygotowania do gry spowoduje jej anulowanie.
+                                Czy chcesz kontynuować?
+                            </p>
+                            <div className='d-flex flex-row justify-content-center'>
+                                <button className='btn btn-success rounded-0 px-3 mb-2 mx-2' onClick={handleLogoutDuringPrep}>
+                                    Tak
+                                </button>
+                                <button className='btn btn-danger rounded-0 px-3 mb-2 mx-2' onClick={() => logOutCancel()}>
+                                    Nie
+                                </button>
+                            </div>
+                        </div>    
+                    </div> 
+                    :
                     localStorage.getItem('opponent') && all_ships_placed === false ?
                     <div className='Game-info-layer'>
                         <div className='Game-info text-center'>
                             <p>
-                                Zanim zaczniesz grę musisz rozmieścić wszystkie statki
+                                Zanim zaczniesz grę musisz rozmieścić wszystkie statki.
                             </p>
                             <div className='d-flex flex-row justify-content-center'>
                                 <button className='btn btn-success rounded-0 px-3 mb-2' onClick={() => setAllShipsPlaced(null)}>
@@ -287,9 +466,8 @@ function Game(props) {
                                 </button>
                             </div>
                         </div>
-                    </div> : ''
-                }
-                {
+                    </div>
+                    :
                     localStorage.getItem('opponent') && surrender_screen === true ?
                     <div className='Game-info-layer'>
                         <div className='Game-info text-center'>
@@ -305,15 +483,44 @@ function Game(props) {
                                 </button>
                             </div>
                         </div>
-                    </div> : ''
-                }
-                {
-                    
+                    </div>
+                    :
+                    localStorage.getItem('opponent') && leave_game_screen === true ?
+                    <div className='Game-info-layer'>
+                        <div className='Game-info text-center'>
+                            <p>
+                                Czy na pewno chcesz anulować grę?
+                            </p>
+                            <div className='d-flex flex-row justify-content-center'>
+                                <button className='btn btn-success rounded-0 px-3 mb-2 mx-2' onClick={leaveGame}>
+                                    Tak
+                                </button>
+                                <button className='btn btn-danger rounded-0 px-3 mb-2 mx-2' onClick={() => setLeaveGameScreen(false)}>
+                                    Nie
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    :        
+                    localStorage.getItem('opponent') && props.game_invite_declined === true ?
+                    <div className='Game-info-layer'>
+                        <div className='Game-info text-center'>
+                            <p>
+                                Gracz <i>{localStorage.getItem('opponent')}</i> odrzucił zaproszenie do gry.
+                            </p>
+                            <div className='d-flex flex-row justify-content-center'>
+                                <button className='btn btn-success rounded-0 px-3 mb-2' onClick={handleGameInviteDeclined}>
+                                    OK
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    :
                     localStorage.getItem('opponent') && not_your_move_screen === true ?
                     <div className='Game-info-layer'>
                         <div className='Game-info text-center'>
                             <p>
-                                Ruch przeciwnika, poczekaj na swoją kolej
+                                Ruch przeciwnika, poczekaj na swoją kolej.
                             </p>
                             <div className='d-flex flex-row justify-content-center'>
                                 <button className='btn btn-success rounded-0 px-3 mb-2' onClick={() => setNotYourMoveScreen(false)}>
@@ -321,20 +528,48 @@ function Game(props) {
                                 </button>
                             </div>
                         </div>
-                    </div> : ''
-                }
-                {
-                    
+                    </div>
+                    :
+                    localStorage.getItem('opponent') && props.game_cancel === true ?
+                    <div className='Game-info-layer'>
+                        <div className='Game-info text-center'>
+                            <p>
+                                Gracz <i>{localStorage.getItem('opponent')}</i> opuścił grę, zostanie ona anulowana.
+                            </p>
+                            <div className='d-flex flex-row justify-content-center'>
+                                <button className='btn btn-success rounded-0 px-3 mb-2' onClick={cancelGame}>
+                                    OK
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    :
+                    localStorage.getItem('opponent') && props.opponent_surrender ? 
+                    <div className='Game-info-layer'>
+                        <div className='Game-info text-center px-5'>
+                            <p>
+                                Gracz <i>{localStorage.getItem('opponent')}</i> poddał się.
+                                <br/>
+                                <span className='text-success'>Wygrałeś</span>
+                            </p>
+                            <div className='d-flex flex-row justify-content-center'>
+                                <button className='btn btn-success rounded-0 px-3 mb-2' onClick={handleOpponentSurrender}>
+                                    OK
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    :
                     localStorage.getItem('opponent') && game_over === true ?
                     <div className='Game-info-layer'>
                         <div className='Game-info text-center px-5'>
                             <p>
-                                Koniec gry
+                                Koniec gry.
                                 <br/>
                                 {
                                     winner === 1 ? 
-                                    <span className='text-success'>WYGRAŁEŚ</span> : 
-                                    <span className='text-danger'>PRZEGRAŁEŚ</span>
+                                    <span className='text-success'>Wygrałeś</span> : 
+                                    <span className='text-danger'>Przegrałeś</span>
                                 }
                             </p>
                             <div className='d-flex flex-row justify-content-center'>
@@ -343,7 +578,8 @@ function Game(props) {
                                 </button>
                             </div>
                         </div>
-                    </div> : ''
+                    </div> 
+                    : ''
                 }
             </div>
     );

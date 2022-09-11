@@ -23,17 +23,10 @@ function ShipsContainer(props) {
         e.preventDefault();
     }
 
-    return (
-        <>
-            {
-                props.title ?
-                <span>{props.title}</span> :
-                ''
-            }
-            <div id={props.id} className={props.className} onDragOver={dragOver} onDrop={drop}>
-                {props.children}
-            </div>
-        </>
+    return (        
+        <div id={props.id} className={props.className} onDragOver={dragOver} onDrop={drop}>
+            {props.children}
+        </div>
     );
 }
 

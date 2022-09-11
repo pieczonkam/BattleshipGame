@@ -26,7 +26,7 @@ function NavigationBar(props) {
                                 <FontAwesomeIcon icon={faUser} fixedWidth/>
                                 <span>&nbsp;&nbsp;Profil</span>
                             </NavLink>
-                            <NavLink id='navlink-3' eventKey='3' onClick={logOut} className='mx-1'>
+                            <NavLink id='navlink-3' eventKey='3' onClick={() => logOut()} className='mx-1'>
                                 <FontAwesomeIcon icon={faArrowRightToBracket} flip='horizontal' fixedWidth/>
                                 <span>&nbsp;&nbsp;Wyloguj się</span>
                             </NavLink>

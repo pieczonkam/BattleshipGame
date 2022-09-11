@@ -30,6 +30,11 @@ public class NotificationService implements INotificationService {
     }
 
     @Override
+    public void deleteNotificationByUsersData(Long userId, Long fromUser) {
+        notificationRepository.deleteNotificationByUsersData(userId, fromUser);
+    }
+
+    @Override
     public List<Tuple> getNotificationsByUserId(Long userId) {
         return notificationRepository.getNotificationsByUserId(userId);
     }

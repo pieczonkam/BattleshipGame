@@ -207,34 +207,43 @@ function BoardTile(props) {
     }
 
     const onBoardBClick = e => {
-        var opponent = localStorage.getItem('opponent');
+        if (localStorage.getItem('game_started') === 'true') {
+            var opponent = localStorage.getItem('opponent');
         
-        if (opponent) {
-            if (localStorage.getItem('your_move') === 'true') {
-                if (!(e.target.classList.contains('Game-board-tile-bg-b-clicked-hit') || e.target.classList.contains('Game-board-tile-bg-b-clicked-miss'))) {
-                    var tile_id  = e.target.id.split('-');
-                    var tile_row = parseInt(tile_id[2]) - 1;
-                    var tile_col = parseInt(tile_id[3]) - 1;
-                    
-                    var your_hits_map = JSON.parse(localStorage.getItem('your_hits_map'));
-                    if (!your_hits_map) {
-                        your_hits_map = prepareBoardMap(BOARD_SIZE);
+            if (opponent) {
+                if (localStorage.getItem('your_move') === 'true') {
+                    if (!(e.target.classList.contains('Game-board-tile-bg-b-clicked-hit') || e.target.classList.contains('Game-board-tile-bg-b-clicked-miss'))) {
+                        props.setYourMove(false);
+                        localStorage.setItem('your_move', 'false');
+                        
+                        var tile_id  = e.target.id.split('-');
+                        var tile_row = parseInt(tile_id[2]) - 1;
+                        var tile_col = parseInt(tile_id[3]) - 1;
+                        
+                        var your_hits_map = JSON.parse(localStorage.getItem('your_hits_map'));
+                        if (!your_hits_map) {
+                            your_hits_map = prepareBoardMap(BOARD_SIZE);
+                        }
+
+                        your_hits_map[tile_row][tile_col] = 1;
+                        localStorage.setItem('your_hits_map', JSON.stringify(your_hits_map));
+
+                        props.sendWsMessage(opponent, tile_row + ' ' + tile_col, 'COORDINATES');
+
+                        let ct = (new Date()).getTime();
+                        
+                        props.sendWsMessage(opponent, JSON.stringify(ct), 'TIME');
+                        props.setCurrentTime(ct);
+                        localStorage.setItem('current_time', String(ct));
                     }
-
-                    your_hits_map[tile_row][tile_col] = 1;
-                    localStorage.setItem('your_hits_map', JSON.stringify(your_hits_map));
-
-                    props.sendWsMessage(opponent, tile_row + ' ' + tile_col, 'COORDINATES');
-                    
-                    e.target.className = 'Game-board-tile-bg-b-clicked-hit';
+                } else {
+                    props.setNotYourMoveScreen(true);
                 }
-            } else {
-                alert('Ruch przeciwnika. Poczekaj na swoją kolej');
             }
-        }
-        else {
-            clearGameData();
-            navigate('/profile');
+            else {
+                clearGameData();
+                navigate('/profile');
+            }
         }
     }
 
@@ -277,6 +286,23 @@ function BoardTile(props) {
             </div>
         );
     } else if (props.type === 'a-bg') {
+        var opponent_hits_map = JSON.parse(localStorage.getItem('opponent_hits_map'));
+        if (!opponent_hits_map) {
+            opponent_hits_map = prepareBoardMap(BOARD_SIZE);
+        }
+
+        if (opponent_hits_map[props.x - 1][props.y - 1] === 2) {
+            return (
+                <div id={id_str} className='Game-board-tile-bg-a-hit'></div>
+            ); 
+        }
+
+        if (opponent_hits_map[props.x - 1][props.y - 1] === 1) {
+            return (
+                <div id={id_str} className='Game-board-tile-bg-a-miss'></div>
+            ); 
+        }
+
         return (
             <div id={id_str} className='Game-board-tile-bg-a'></div>
         );
@@ -288,13 +314,13 @@ function BoardTile(props) {
 
         if (your_hits_map[props.x - 1][props.y - 1] === 2) {
             return (
-                <div id={id_str} className='Game-board-tile-bg-b-clicked-hit' onClick={onBoardBClick}></div>
+                <div id={id_str} className='Game-board-tile-bg-b-clicked-hit'></div>
             );
         }
 
         if (your_hits_map[props.x - 1][props.y - 1] === 1) {
             return (
-                <div id={id_str} className='Game-board-tile-bg-b-clicked-miss' onClick={onBoardBClick}></div>
+                <div id={id_str} className='Game-board-tile-bg-b-clicked-miss'></div>
             );
         }
 
