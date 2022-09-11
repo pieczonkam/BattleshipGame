@@ -220,14 +220,6 @@ function BoardTile(props) {
                         var tile_row = parseInt(tile_id[2]) - 1;
                         var tile_col = parseInt(tile_id[3]) - 1;
                         
-                        var your_hits_map = JSON.parse(localStorage.getItem('your_hits_map'));
-                        if (!your_hits_map) {
-                            your_hits_map = prepareBoardMap(BOARD_SIZE);
-                        }
-
-                        your_hits_map[tile_row][tile_col] = 1;
-                        localStorage.setItem('your_hits_map', JSON.stringify(your_hits_map));
-
                         props.sendWsMessage(opponent, tile_row + ' ' + tile_col, 'COORDINATES');
 
                         let ct = (new Date()).getTime();
@@ -235,6 +227,8 @@ function BoardTile(props) {
                         props.sendWsMessage(opponent, JSON.stringify(ct), 'TIME');
                         props.setCurrentTime(ct);
                         localStorage.setItem('current_time', String(ct));
+
+                        e.target.className = 'Game-board-tile-bg-b-clicked-miss';
                     }
                 } else {
                     props.setNotYourMoveScreen(true);

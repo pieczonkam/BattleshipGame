@@ -1,26 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate }                from 'react-router-dom';
-import { FontAwesomeIcon }            from '@fortawesome/react-fontawesome';
+import React, { useState, useEffect }          from 'react';
+import { useNavigate }                         from 'react-router-dom';
+import { FontAwesomeIcon }                     from '@fortawesome/react-fontawesome';
 import { faRotate,
         faRotateRight,
         faPlay,
         faFlag,
         faArrowRightToBracket,
-        faCheck }                     from '@fortawesome/free-solid-svg-icons';
-import { Tooltip, Button }            from '@mui/material';
+        faCheck }                              from '@fortawesome/free-solid-svg-icons';
+import { Tooltip, Button }                     from '@mui/material';
 
-import ShipsContainer                 from './ShipsContainer';
-import Ship                           from './Ship';
-import BoardTile                      from './BoardTile';
-import Timer                          from './Timer';
+import ShipsContainer                          from './ShipsContainer';
+import Ship                                    from './Ship';
+import BoardTile                               from './BoardTile';
+import Timer                                   from './Timer';
 
-import { BOARD_SIZE }                 from '../../utils/constants';
+import { BOARD_SIZE }                          from '../../utils/constants';
 import { clearGameData, 
         getRandomInt, 
-        prepareBoardMap }             from '../../utils/utils';
-import { switchNavLink }              from '../../utils/utils';
-import { logOut, logOutCancel}        from '../../utils/utilsAPI';
-import { addGameRequest, deleteNotificationByUsersDataRequest } from '../../utils/requestsAPI';
+        prepareBoardMap }                      from '../../utils/utils';
+import { switchNavLink }                       from '../../utils/utils';
+import { logOut, logOutCancel}                 from '../../utils/utilsAPI';
+import { addGameRequest, 
+        deleteNotificationByUsersDataRequest } from '../../utils/requestsAPI';
 
 function Game(props) {
     const [ships_vertical_state, setShipsVerticalState] = useState(false);
@@ -33,10 +34,20 @@ function Game(props) {
     const [surrender_screen, setSurrenderScreen]        = useState(false);
     const [leave_game_screen, setLeaveGameScreen]       = useState(false);
     const [not_your_move_screen, setNotYourMoveScreen]  = useState(false);
-    const [game_over, setGameOver]                      = useState(false);
-    const [winner, setWinner]                           = useState(1);
-
+    const [time_over, setTimeOver]                      = useState(false);
+    
     const navigate = useNavigate();
+
+    useEffect(() => {
+        var opponent = localStorage.getItem('opponent');
+
+        if (time_over && localStorage.getItem('your_move') === 'false' && opponent) {
+            props.setWinner(1);
+            props.setGameOver(true);
+            props.sendWsMessage(opponent, '', 'WIN');
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [time_over]);
 
     useEffect(() => {  
         const setShipsUE = () => {
@@ -97,19 +108,35 @@ function Game(props) {
             setShipsVertical(ships_vertical_arr);
             setShipsOnBoard(ships_on_board_arr);
             localStorage.setItem('board_map', JSON.stringify(board_map));
-
-            var ships_sunk_arr = [
-                                    <div key='1' className='Game-ship-set ship-3-horizontal'></div>,
-                                    <div key='2' className='Game-ship-set ship-4-horizontal'></div>
-                                ]
-
-            setShipsSunk(ships_sunk_arr);
         }
     
         setShipsUE();
         switchNavLink('navlink-1');
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        const setShipsSunkUE = () => {
+            var ships_sunk_arr      = [];
+            var ships_sunk_data_arr = JSON.parse(localStorage.getItem('ships_sunk'));
+            if (!ships_sunk_data_arr) {
+                ships_sunk_data_arr = [];
+            }
+
+            for (let i = 0; i < ships_sunk_data_arr.length; ++i) {
+                let id  = ships_sunk_data_arr[i].split(' ')[0] + '-sunk';
+                let len = parseInt(ships_sunk_data_arr[i].split(' ')[1]); 
+
+                ships_sunk_arr.push(<div key={id} className={'Game-ship-set ship-' + (len - 1) + '-horizontal'}></div>);
+            }
+
+            props.setNewShipSunk(false);
+            setShipsSunk(ships_sunk_arr);
+        }
+
+        setShipsSunkUE();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.new_ship_sunk])
 
     const getBoard = (type) => {
         var board_tiles_arr = [];
@@ -144,7 +171,7 @@ function Game(props) {
         if (opponent) {
             if (document.getElementById('ships-container').childNodes.length > 0) {
                 setAllShipsPlaced(false);
-            } else {
+            } else if (localStorage.getItem('opponent_joined') === 'true') {
                 let move_order = getRandomInt(1, 3);
                 if (!localStorage.getItem('your_move')) {
                     if (move_order === 1) {
@@ -166,6 +193,7 @@ function Game(props) {
                     props.setCurrentTime(ct);
                     localStorage.setItem('current_time', String(ct));
                     
+                    localStorage.setItem('ships_sunk', JSON.stringify([]));
                     localStorage.setItem('game_started', 'true');
                     props.setGameStarted(true);
                 }
@@ -185,9 +213,14 @@ function Game(props) {
                 logOut();
             }
 
-            props.sendWsMessage(opponent, '', 'CANCEL');
+            if (localStorage.getItem('opponent_joined')) {
+                props.sendWsMessage(opponent, '', 'CANCEL');
+            } else {
+                props.sendWsMessage(opponent, 'refresh', 'CANCEL');
+            }
         }
         
+        props.setOpponentReady(false);
         clearGameData();
         navigate('/profile');
     }
@@ -207,32 +240,38 @@ function Game(props) {
             }
         }
         
+        props.setOpponentReady(false);
         props.setGameStarted(false);
         clearGameData();
         navigate('/profile');
     }
 
     const resetShips = () => {
-        localStorage.removeItem('ships_set');
-        localStorage.removeItem('board_map');
-        localStorage.removeItem('your_hits_map');
-        localStorage.removeItem('opponent_hits_map');
-        window.location.reload(false);
+        if (localStorage.getItem('you_ready') !== 'true') {
+            localStorage.removeItem('ships_set');
+            localStorage.removeItem('board_map');
+            localStorage.removeItem('your_hits_map');
+            localStorage.removeItem('opponent_hits_map');
+            window.location.reload(false);
+        }
     }
 
     const handleGameInviteDeclined = () => {
+        props.setOpponentReady(false);
         props.setGameInviteDeclined(false);
         clearGameData();
         navigate('/profile');
     }
 
     const cancelGame = () => {
+        props.setOpponentReady(false);
         props.setGameCancel(false);
         clearGameData();
         navigate('/profile');
     }
 
     const handleOpponentSurrender = () => {
+        props.setOpponentReady(false);
         props.setOpponentSurrender(false);
         props.setGameStarted(false);
         clearGameData();
@@ -240,7 +279,27 @@ function Game(props) {
     }
 
     const handleConnectionLost = () => {
+        props.setOpponentReady(false);
+        props.setGameStarted(false);
         props.setConnectionLost(false);
+        clearGameData();
+        navigate('/profile');
+    }
+
+    const handleGameOver = async (save_result) => {
+        var opponent = localStorage.getItem('opponent');
+        var username = localStorage.getItem('username');
+
+        if (save_result && opponent && username) {
+            await addGameRequest(localStorage.getItem('jwt'), {
+                username1: username, 
+                username2: opponent 
+            });
+        }
+    
+        props.setGameOver(false);
+        props.setOpponentReady(false);
+        props.setGameStarted(false);
         clearGameData();
         navigate('/profile');
     }
@@ -267,7 +326,12 @@ function Game(props) {
         var opponent = localStorage.getItem('opponent');
         if (opponent) {
             await deleteNotificationByUsersDataRequest(localStorage.getItem('jwt'), opponent);
-            props.sendWsMessage(opponent, '', 'CANCEL');
+            
+            if (localStorage.getItem('opponent_joined')) {
+                props.sendWsMessage(opponent, '', 'CANCEL');
+            } else {
+                props.sendWsMessage(opponent, 'refresh', 'CANCEL');
+            }
         }
         
         logOut(true);
@@ -292,7 +356,7 @@ function Game(props) {
                             <div className='Game-board-b d-flex flex-column align-items-center text-bold'>
                                 <span>
                                     {
-                                        !props.game_started && props.opponent_ready && localStorage.getItem('opponent_ready') === 'true' ? 
+                                        !props.game_started && (props.opponent_ready || localStorage.getItem('opponent_ready') === 'true') ? 
                                         <>
                                             <FontAwesomeIcon icon={faCheck} className='text-success'/> 
                                             {' '}
@@ -367,7 +431,7 @@ function Game(props) {
                             </> :
                             <>
                                 <div className='d-flex flex-row pt-3'>
-                                    <Timer className='Game-timer' minutes={1} seconds={30} current_time={props.current_time} stop_time={props.opponent_surrender}/>
+                                    <Timer className='Game-timer' minutes={1} seconds={30} current_time={props.current_time} stop_time={props.opponent_surrender || props.game_over} setTimeOver={setTimeOver}/>
                                     <button className='Game-button-long btn btn-danger rounded-0' onClick={() => setSurrenderScreen(true)}>
                                         <FontAwesomeIcon icon={faFlag}/>
                                         {' '}Poddaj się
@@ -379,7 +443,7 @@ function Game(props) {
                                     }
                                     </span>
                                 </div>
-                                <span className='Game-ships-container-horizontal-title'>Zatopione statki:</span>
+                                <span className='Game-ships-container-horizontal-title'>Zatopione statki przeciwnika:</span>
                                 <div className='Game-ships-container-horizontal-with-title'>
                                 {
                                     ships_sunk.map(ship => {
@@ -468,7 +532,7 @@ function Game(props) {
                         </div>
                     </div>
                     :
-                    localStorage.getItem('opponent') && surrender_screen === true ?
+                    localStorage.getItem('opponent') && surrender_screen ?
                     <div className='Game-info-layer'>
                         <div className='Game-info text-center'>
                             <p>
@@ -485,7 +549,7 @@ function Game(props) {
                         </div>
                     </div>
                     :
-                    localStorage.getItem('opponent') && leave_game_screen === true ?
+                    localStorage.getItem('opponent') && leave_game_screen ?
                     <div className='Game-info-layer'>
                         <div className='Game-info text-center'>
                             <p>
@@ -502,7 +566,7 @@ function Game(props) {
                         </div>
                     </div>
                     :        
-                    localStorage.getItem('opponent') && props.game_invite_declined === true ?
+                    localStorage.getItem('opponent') && props.game_invite_declined ?
                     <div className='Game-info-layer'>
                         <div className='Game-info text-center'>
                             <p>
@@ -516,7 +580,7 @@ function Game(props) {
                         </div>
                     </div>
                     :
-                    localStorage.getItem('opponent') && not_your_move_screen === true ?
+                    localStorage.getItem('opponent') && not_your_move_screen ?
                     <div className='Game-info-layer'>
                         <div className='Game-info text-center'>
                             <p>
@@ -530,7 +594,7 @@ function Game(props) {
                         </div>
                     </div>
                     :
-                    localStorage.getItem('opponent') && props.game_cancel === true ?
+                    localStorage.getItem('opponent') && props.game_cancel ?
                     <div className='Game-info-layer'>
                         <div className='Game-info text-center'>
                             <p>
@@ -560,20 +624,20 @@ function Game(props) {
                         </div>
                     </div>
                     :
-                    localStorage.getItem('opponent') && game_over === true ?
+                    localStorage.getItem('opponent') && props.game_over ?
                     <div className='Game-info-layer'>
                         <div className='Game-info text-center px-5'>
                             <p>
-                                Koniec gry.
+                                Koniec gry{time_over ? ' (brak czasu)' : ''}.
                                 <br/>
                                 {
-                                    winner === 1 ? 
+                                    props.winner === 1 ? 
                                     <span className='text-success'>Wygrałeś</span> : 
                                     <span className='text-danger'>Przegrałeś</span>
                                 }
                             </p>
                             <div className='d-flex flex-row justify-content-center'>
-                                <button className='btn btn-success rounded-0 px-3 mb-2' onClick={() => setGameOver(false)}>
+                                <button className='btn btn-success rounded-0 px-3 mb-2' onClick={() => handleGameOver(props.winner === 1 ? true : false)}>
                                     OK
                                 </button>
                             </div>

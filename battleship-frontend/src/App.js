@@ -5,7 +5,7 @@ import SockJS                         from 'sockjs-client';
 import {over}                         from 'stompjs';
 
 import { isLoggedIn, logOut }         from './utils/utilsAPI';
-import { clearGameData }              from './utils/utils';
+import { clearGameData, isShipSunk }  from './utils/utils';
 import { API_URL,
         BOARD_SIZE }                  from './utils/constants';
 import { prepareBoardMap }            from './utils/utils';
@@ -15,7 +15,6 @@ import Game                           from './components/game/Game';
 import Login                          from './components/authentication/Login';
 import Register                       from './components/authentication/Register';
 import Profile                        from './components/profile/Profile';
-import ChatRoom                       from './components/ChatRoom';
 
 var stomp_client = null;
 
@@ -27,20 +26,17 @@ function App() {
     const [game_cancel, setGameCancel]                  = useState(false);
     const [opponent_surrender, setOpponentSurrender]    = useState(false);
     const [connection_lost, setConnectionLost]          = useState(false);
+    const [opponent_ready, setOpponentReady]            = useState(false);
+    const [new_ship_sunk, setNewShipSunk]               = useState(false);
+    const [game_over, setGameOver]                      = useState(false);
+    const [winner, setWinner]                           = useState(0);
     const [game_started, setGameStarted]                = useState(localStorage.getItem('game_started') === 'true' ? true : false);
-    const [opponent_ready, setOpponentReady]            = useState(localStorage.getItem('opponent_ready') === 'true' ? true : false);
     const [current_time, setCurrentTime]                = useState(localStorage.getItem('current_time') ? localStorage.getItem('current_time') : (new Date()).getTime());
     const [your_move, setYourMove]                      = useState(localStorage.getItem('your_move') === 'true' ? true : false);
 
     const getWsMessage = (payload) => {
         const message  = JSON.parse(payload.body);
         const opponent = localStorage.getItem('opponent');
-
-        console.log('Printing message');
-        console.log(message.status);
-        console.log(message.message);
-        console.log(message.receiverName);
-        console.log(message.senderName);
 
         switch (message.status) {
             case 'DECLINE':
@@ -50,10 +46,14 @@ function App() {
                 break;
 
             case 'CANCEL':
-                if (opponent) {
-                    setGameCancel(true);
-                } else {
+                if (message.message === 'refresh') {
                     window.location.reload(false);
+                } else {
+                    if (opponent) {
+                        setGameCancel(true);
+                    } else {
+                        window.location.reload(false);
+                    }
                 }
                 break;
 
@@ -70,6 +70,8 @@ function App() {
             case 'ACCEPT':
                 if (opponent !== message.senderName) {
                     sendWsMessage(message.senderName, '', 'CANCEL');
+                } else {
+                    localStorage.setItem('opponent_joined', 'true');
                 }
                 break;
 
@@ -91,6 +93,7 @@ function App() {
                     }
 
                     if (localStorage.getItem('you_ready') === 'true' && localStorage.getItem('opponent_ready') === 'true') {
+                        localStorage.setItem('ships_sunk', JSON.stringify([]));
                         localStorage.setItem('game_started', 'true');
                         setGameStarted(true);
                     }
@@ -117,10 +120,14 @@ function App() {
                         your_hits_map = prepareBoardMap(BOARD_SIZE);
                     }
 
+                    const board_tile = document.getElementById('board-b-' + (x + 1) + '-' + (y + 1));
+
                     if (result === 'true') {
                         your_hits_map[x][y] = 2;
+                        board_tile.className = 'Game-board-tile-bg-b-clicked-hit';
                     } else {
                         your_hits_map[x][y] = 1;
+                        board_tile.className = 'Game-board-tile-bg-b-clicked-miss';
                     }
 
                     localStorage.setItem('your_hits_map', JSON.stringify(your_hits_map));
@@ -148,15 +155,69 @@ function App() {
                         opponent_hits_map = prepareBoardMap(BOARD_SIZE);
                     }
 
+                    const board_tile = document.getElementById('board-a-bg-' + (x + 1) + '-' + (y + 1));
+
                     if (board_map[x][y] === 2) {
                         opponent_hits_map[x][y] = 2;
+                        board_tile.className = 'Game-board-tile-bg-a-hit';
+                        board_tile.style = '';
                         sendWsMessage(opponent, String(x + ' ' + y + ' true'), 'HIT');
                     } else {
                         opponent_hits_map[x][y] = 1;
+                        board_tile.className = 'Game-board-tile-bg-a-miss';
+                        board_tile.style = '';
                         sendWsMessage(opponent, String(x + ' ' + y + ' false'), 'HIT');
                     }
 
                     localStorage.setItem('opponent_hits_map', JSON.stringify(opponent_hits_map));
+
+                    var ships_set = JSON.parse(localStorage.getItem('ships_set'));
+                    if (ships_set) {
+                        for (let i = 0; i < ships_set.length; ++i) {
+                            let id         = ships_set[i].split('|')[0];
+                            let parameters = ships_set[i].split('|')[1];
+                            if (isShipSunk(opponent_hits_map, parameters)) {
+                                sendWsMessage(opponent, id + ' ' + parameters.split(' ')[0], 'SHIP_SUNK');
+                            }
+                        }
+                    }
+                } else {
+                    clearGameData();
+                    navigate('/profile');
+                }
+                break;
+            
+            case 'SHIP_SUNK':
+                if (opponent) {
+                    var ship_data = message.message;
+
+                    var ships_sunk = JSON.parse(localStorage.getItem('ships_sunk'));
+                    if (!ships_sunk) {
+                        ships_sunk = [];
+                    }
+
+                    if (!ships_sunk.includes(ship_data)) {
+                        ships_sunk.push(ship_data);
+                        setNewShipSunk(true);
+                    }
+
+                    if (ships_sunk.length === 5 && !game_over) {
+                        setWinner(1);
+                        setGameOver(true);
+                        sendWsMessage(message.senderName, '', 'WIN');
+                    }
+
+                    localStorage.setItem('ships_sunk', JSON.stringify(ships_sunk));
+                } else {
+                    clearGameData();
+                    navigate('/profile');
+                }
+                break;
+
+            case 'WIN':
+                if (opponent) {
+                    setWinner(2);
+                    setGameOver(true);
                 } else {
                     clearGameData();
                     navigate('/profile');
@@ -189,7 +250,7 @@ function App() {
         const wsConnect = () => {
             let sock = new SockJS(API_URL + '/ws');
             stomp_client = over(sock);
-            // stomp_client.debug = null;
+            stomp_client.debug = null;
             stomp_client.connect({}, onConnect, onError);
         }
     
@@ -239,11 +300,10 @@ function App() {
                     <NavigationBar logged_in={logged_in}/>            
                     <Routes>
                         <Route path='/'         element={logged_in  ? <Navigate to='/profile' replace /> : <Navigate to='/login' replace />} />
-                        <Route path='/game'     element={logged_in  ? <Game sendWsMessage={sendWsMessage} game_started={game_started} setGameStarted={setGameStarted} game_invite_declined={game_invite_declined} setGameInviteDeclined={setGameInviteDeclined} game_cancel={game_cancel} setGameCancel={setGameCancel} opponent_surrender={opponent_surrender} setOpponentSurrender={setOpponentSurrender} opponent_ready={opponent_ready} current_time={current_time} setCurrentTime={setCurrentTime} connection_lost={connection_lost} setConnectionLost={setConnectionLost} your_move={your_move} setYourMove={setYourMove} /> : <Navigate to='/login' replace />} />
+                        <Route path='/game'     element={logged_in  ? <Game sendWsMessage={sendWsMessage} game_started={game_started} setGameStarted={setGameStarted} game_invite_declined={game_invite_declined} setGameInviteDeclined={setGameInviteDeclined} game_cancel={game_cancel} setGameCancel={setGameCancel} opponent_surrender={opponent_surrender} setOpponentSurrender={setOpponentSurrender} opponent_ready={opponent_ready} setOpponentReady={setOpponentReady} current_time={current_time} setCurrentTime={setCurrentTime} connection_lost={connection_lost} setConnectionLost={setConnectionLost} your_move={your_move} setYourMove={setYourMove} new_ship_sunk={new_ship_sunk} setNewShipSunk={setNewShipSunk} game_over={game_over} setGameOver={setGameOver} winner={winner} setWinner={setWinner} /> : <Navigate to='/login' replace />} />
                         <Route path='/login'    element={!logged_in ? <Login /> : <Navigate to='/profile' replace />} />
                         <Route path='/register' element={!logged_in ? <Register /> : <Navigate to='/profile' replace />} />
-                        <Route path='/profile'  element={logged_in  ? <Profile sendWsMessage={sendWsMessage} /> : <Navigate to='/login' replace />} />
-                        <Route path='/chatRoom' element={logged_in  ? <ChatRoom /> : <Navigate to='/login' replace />} />
+                        <Route path='/profile'  element={logged_in  ? localStorage.getItem('you_ready') !== 'true' ? <Profile sendWsMessage={sendWsMessage} game_started={game_started} setGameStarted={setGameStarted} game_invite_declined={game_invite_declined} setGameInviteDeclined={setGameInviteDeclined} game_cancel={game_cancel} setGameCancel={setGameCancel} opponent_surrender={opponent_surrender} setOpponentSurrender={setOpponentSurrender} connection_lost={connection_lost} setConnectionLost={setConnectionLost} setOpponentReady={setOpponentReady} game_over={game_over} setGameOver={setGameOver} winner={winner} /> : <Navigate to='/game' replace /> : <Navigate to='/login' replace />} />
                         <Route path='*'         element={<Navigate to='/' replace />} />
                     </Routes>
                 </>

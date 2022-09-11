@@ -2,7 +2,7 @@ import React, { useState, useEffect} from 'react'
 
 const Timer = (props) => {
     const [minutes, setMinutes]                = useState(props.minutes);
-    const [seconds, setSeconds]                =  useState(props.seconds);
+    const [seconds, setSeconds]                = useState(props.seconds);
     const [current_minutes, setCurrentMinutes] = useState(0);
     const [current_seconds, setCurrentSeconds] = useState(0);
     
@@ -35,6 +35,7 @@ const Timer = (props) => {
             }
             if (seconds === 0) {
                 if (minutes === 0) {
+                    props.setTimeOver(true);
                     clearInterval(myInterval);
                 } else {
                     setMinutes(minutes - 1);

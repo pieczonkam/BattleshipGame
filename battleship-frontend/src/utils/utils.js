@@ -38,12 +38,12 @@ const clearGameData = () => {
     localStorage.removeItem('game_started');
     localStorage.removeItem('you_ready');
     localStorage.removeItem('opponent_ready');
-    localStorage.removeItem('yout_hits');
-    localStorage.removeItem('opponent_hits');
     localStorage.removeItem('ships_set');
     localStorage.removeItem('current_time');
     localStorage.removeItem('logout_during_game');
     localStorage.removeItem('logout_during_prep');
+    localStorage.removeItem('ships_sunk');
+    localStorage.removeItem('opponent_joined');
 
     localStorage.setItem('board_map', JSON.stringify(prepareBoardMap(BOARD_SIZE)));
     localStorage.setItem('your_hits_map', JSON.stringify(prepareBoardMap(BOARD_SIZE)));
@@ -73,15 +73,20 @@ const switchNavLink = (nav_link) => {
 }
 
 const isShipSunk = (hits_map, ship_parameters) => {
-    if (ship_parameters.orientation === 'horizontal') {
-        for (let i = 0; i < ship_parameters.length; ++i) {
-            if (hits_map[ship_parameters.x + i][ship_parameters.y] !== 2) {
+    var ship_length      = parseInt(ship_parameters.split(' ')[0]);
+    var ship_orientation = ship_parameters.split(' ')[1];
+    var x                = parseInt(ship_parameters.split(' ')[2]) - 1;
+    var y                = parseInt(ship_parameters.split(' ')[3]) - 1; 
+
+    if (ship_orientation === 'horizontal') {
+        for (let i = 0; i < ship_length; ++i) {
+            if (hits_map[x][y + i] !== 2) {
                 return false;
             }
         }
     } else {
-        for (let i = 0; i < ship_parameters.length; ++i) {
-            if (hits_map[ship_parameters.x][ship_parameters.y] !== 2) {
+        for (let i = 0; i < ship_length; ++i) {
+            if (hits_map[x + i][y] !== 2) {
                 return false;
             }
         }

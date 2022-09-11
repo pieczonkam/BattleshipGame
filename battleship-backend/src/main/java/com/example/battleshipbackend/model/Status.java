@@ -9,4 +9,6 @@ public enum Status {
     TIME,
     COORDINATES,
     HIT,
+    SHIP_SUNK,
+    WIN
 }

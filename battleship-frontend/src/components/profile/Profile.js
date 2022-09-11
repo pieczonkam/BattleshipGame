@@ -27,7 +27,8 @@ import { addNotificationRequest,
         addGameRequest,
         deleteNotificationByUsersDataRequest} from '../../utils/requestsAPI';
 import { logOut, logOutCancel }               from '../../utils/utilsAPI';
-import { switchNavLink }                      from '../../utils/utils';
+import { switchNavLink,
+        clearGameData }                       from '../../utils/utils';
 
 function Profile(props) {
     const [user_data, setUserData] = useState({username: '', email: ''});
@@ -36,7 +37,7 @@ function Profile(props) {
     const [user_games, setUserGames] = useState([]);
     const [messages, setMessages] = useState([]);    
     const [notifications, setNotifications] = useState([]);
-
+    
     const navigate = useNavigate();
 
     const handleSubmitSearch = async (e) => {
@@ -231,6 +232,7 @@ function Profile(props) {
 
     const handleGameAccept = (username) => {
         props.sendWsMessage(username, '', 'ACCEPT');
+        localStorage.setItem('opponent_joined', 'true');
         localStorage.setItem('opponent', username);
         navigate('/game');
     }
@@ -342,6 +344,54 @@ function Profile(props) {
         document.forms[3].reset();
     }
 
+    const handleGameInviteDeclined = () => {
+        props.setOpponentReady(false);
+        props.setGameInviteDeclined(false);
+        clearGameData();
+        navigate('/profile');
+    }
+
+    const cancelGame = () => {
+        props.setOpponentReady(false);
+        props.setGameCancel(false);
+        clearGameData();
+        navigate('/profile');
+    }
+
+    const handleOpponentSurrender = () => {
+        props.setOpponentReady(false);
+        props.setOpponentSurrender(false);
+        props.setGameStarted(false);
+        clearGameData();
+        navigate('/profile');
+    }
+
+    const handleConnectionLost = () => {
+        props.setOpponentReady(false);
+        props.setGameStarted(false);
+        props.setConnectionLost(false);
+        clearGameData();
+        navigate('/profile');
+    }
+
+    const handleGameOver = async (save_result) => {
+        var opponent = localStorage.getItem('opponent');
+        var username = localStorage.getItem('username');
+
+        if (save_result && opponent && username) {
+            await addGameRequest(localStorage.getItem('jwt'), {
+                username1: username, 
+                username2: opponent 
+            });
+        }
+    
+        props.setGameOver(false);
+        props.setOpponentReady(false);
+        props.setGameStarted(false);
+        clearGameData();
+        navigate('/profile');
+    }
+
     const handleLogoutDuringGame = async () => {
         var opponent = localStorage.getItem('opponent');
         var username = localStorage.getItem('username');
@@ -364,7 +414,12 @@ function Profile(props) {
         var opponent = localStorage.getItem('opponent');
         if (opponent) {
             await deleteNotificationByUsersDataRequest(localStorage.getItem('jwt'), opponent);
-            props.sendWsMessage(opponent, '', 'CANCEL');
+            
+            if (localStorage.getItem('opponent_joined')) {
+                props.sendWsMessage(opponent, '', 'CANCEL');
+            } else {
+                props.sendWsMessage(opponent, 'refresh', 'CANCEL');
+            }
         }
         
         logOut(true);
@@ -373,6 +428,7 @@ function Profile(props) {
     useEffect(() => {
         const handleGameAcceptUE = (username) => {
             props.sendWsMessage(username, '', 'ACCEPT');
+            localStorage.setItem('opponent_joined', 'true');
             localStorage.setItem('opponent', username);
             navigate('/game');
         }
@@ -717,8 +773,86 @@ function Profile(props) {
                             </button>
                         </div>
                     </div>    
+                </div>
+                :
+                localStorage.getItem('opponent') && props.connection_lost ? 
+                <div className='Profile-info-layer'>
+                    <div className='Profile-info text-center'>
+                        <p>
+                            Połączenie z drugim graczem zostało zerwane.
+                        </p>
+                        <div className='d-flex flex-row justify-content-center'>
+                            <button className='btn btn-success rounded-0 px-3 mb-2 mx-2' onClick={handleConnectionLost}>
+                                OK
+                            </button>
+                        </div>
+                    </div>    
                 </div> 
                 :
+                localStorage.getItem('opponent') && props.game_invite_declined ?
+                <div className='Profile-info-layer'>
+                    <div className='Profile-info text-center'>
+                        <p>
+                            Gracz <i>{localStorage.getItem('opponent')}</i> odrzucił zaproszenie do gry.
+                        </p>
+                        <div className='d-flex flex-row justify-content-center'>
+                            <button className='btn btn-success rounded-0 px-3 mb-2' onClick={handleGameInviteDeclined}>
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                :
+                localStorage.getItem('opponent') && props.game_cancel ?
+                <div className='Profile-info-layer'>
+                    <div className='Profile-info text-center'>
+                        <p>
+                            Gracz <i>{localStorage.getItem('opponent')}</i> opuścił grę, zostanie ona anulowana.
+                        </p>
+                        <div className='d-flex flex-row justify-content-center'>
+                            <button className='btn btn-success rounded-0 px-3 mb-2' onClick={cancelGame}>
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                :
+                localStorage.getItem('opponent') && props.opponent_surrender ? 
+                <div className='Profile-info-layer'>
+                    <div className='Profile-info text-center px-5'>
+                        <p>
+                            Gracz <i>{localStorage.getItem('opponent')}</i> poddał się.
+                            <br/>
+                            <span className='text-success'>Wygrałeś</span>
+                        </p>
+                        <div className='d-flex flex-row justify-content-center'>
+                            <button className='btn btn-success rounded-0 px-3 mb-2' onClick={handleOpponentSurrender}>
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                :
+                localStorage.getItem('opponent') && props.game_over ?
+                <div className='Profile-info-layer'>
+                    <div className='Profile-info text-center px-5'>
+                        <p>
+                            Koniec gry.
+                            <br/>
+                            {
+                                props.winner === 1 ? 
+                                <span className='text-success'>Wygrałeś</span> : 
+                                <span className='text-danger'>Przegrałeś</span>
+                            }
+                        </p>
+                        <div className='d-flex flex-row justify-content-center'>
+                            <button className='btn btn-success rounded-0 px-3 mb-2' onClick={() => handleGameOver(props.winner === 1 ? true : false)}>
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div> 
+                : 
                 localStorage.getItem('opponent') ?
                 <div className='Profile-info-layer'>
                     <div className='Profile-info'>

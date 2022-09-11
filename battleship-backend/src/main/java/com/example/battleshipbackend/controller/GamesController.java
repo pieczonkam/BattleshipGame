@@ -49,7 +49,6 @@ public class GamesController {
 
             return new ResponseEntity<>(_games, HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
