@@ -4,6 +4,9 @@ import com.example.battleshipbackend.model.User;
 
 import java.util.List;
 
+/**
+ * Interfejs implementowany przez klasę UserService
+ */
 public interface IUserService {
 
     User getUserById(Long id);

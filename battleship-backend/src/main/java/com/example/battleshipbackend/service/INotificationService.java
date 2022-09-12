@@ -5,6 +5,9 @@ import com.example.battleshipbackend.model.Notification;
 import javax.persistence.Tuple;
 import java.util.List;
 
+/**
+ * Interfejs implementowany przez klasę NotificationService
+ */
 public interface INotificationService {
 
     Notification addNotification(Notification notification);

@@ -23,18 +23,35 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Klasa pełniąca rolę kontrolera dla zapytań związanych z użytkownikami
+ */
 @RestController
 @CrossOrigin
 @RequestMapping("/users")
 public class UserController {
 
+    /**
+     * Obiekt UserService pozwalający na wykonanie poszczególnych operacji na bazie danych
+     */
     @Autowired
     private IUserService userService;
+    /**
+     * Obiekt NotificationService pozwalający na wykonanie poszczególnych operacji na bazie danych
+     */
     @Autowired
     private INotificationService notificationService;
+    /**
+     * Obiekt UserRelationService pozwalający na wykonanie poszczególnych operacji na bazie danych
+     */
     @Autowired
     private IUserRelationService userRelationService;
 
+    /**
+     * Metoda obsługująca żądanie zwrócenia listy znajomych danego użytkownika
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @return status HTTP oraz lista znajomych danego użytkownika
+     */
     @GetMapping(path = "/getFriends", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<User>> getFriends(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         try {
@@ -56,6 +73,12 @@ public class UserController {
         }
     }
 
+    /**
+     * Metoda obsługująca zwrócenie listy użytkowników pasujących do podanego wzorca
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @param pattern wzorzec, na podstawie którego wybierani są użytkownicy
+     * @return status HTTP oraz lista użytkowników pasujących do wzorca
+     */
     @GetMapping(path = "/getPotentialFriends/{pattern}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<User>> findUsers(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, @PathVariable String pattern) {
         try {
@@ -82,6 +105,11 @@ public class UserController {
         }
     }
 
+    /**
+     * Metoda obsługująca żądanie zwrócenia danych użytkownika
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @return status HTTP oraz dane użytkownika
+     */
     @GetMapping(path = "/getUser", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<User> getUser(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         try {
@@ -101,6 +129,12 @@ public class UserController {
         }
     }
 
+    /**
+     * Metoda sprawdzająca, czy podane hasło jest poprawne
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @param user dane użytkownika
+     * @return status HTTP oraz wartość logiczna wskazująca, czy hasło jest poprawne
+     */
     @PostMapping(path = "/passwordCorrect", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Boolean> passwordCorrect(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, @RequestBody User user) {
         try {
@@ -125,6 +159,12 @@ public class UserController {
         }
     }
 
+    /**
+     * Metoda obsługująca żądanie zmiany hasła użytkownika
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @param user dane użytkownika
+     * @return status HTTP
+     */
     @PutMapping(path = "/changePassword", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<HttpStatus> changePassword(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, @RequestBody User user) {
         try {
@@ -148,6 +188,12 @@ public class UserController {
         }
     }
 
+    /**
+     * Metoda obsługująca żądanie zmiany adresu e-mail użytkownika
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @param user dane użytkownika
+     * @return status HTTP
+     */
     @PutMapping(path = "/changeEmail", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<HttpStatus> changeEmail(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, @RequestBody User user) {
         try {
@@ -175,6 +221,12 @@ public class UserController {
         }
     }
 
+    /**
+     * Metoda obsługująca żądanie zmiany nazwy użytkownika
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @param user dane użytkownika
+     * @return status HTTP
+     */
     @PutMapping(path = "/changeUsername", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<HttpStatus> changeUsername(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, @RequestBody User user) {
         try {
@@ -202,6 +254,12 @@ public class UserController {
         }
     }
 
+    /**
+     * Metoda obsługująca żądanie dodania nowego powiadomienia
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @param notification dane powiadomienia
+     * @return status HTTP
+     */
     @PostMapping(path = "/addNotification", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<HttpStatus> addNotification(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, @RequestBody Notification notification) {
         try {
@@ -249,6 +307,11 @@ public class UserController {
         }
     }
 
+    /**
+     * Metoda obsługująca żądanie zwrócenia listy powiadomień
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @return status HTTP oraz lista powiadomień
+     */
     @GetMapping(path = "/getNotifications", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<HashMap<String, String>>> getNotifications(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         try {
@@ -277,6 +340,12 @@ public class UserController {
         }
     }
 
+    /**
+     * Metoda obsługująca żądanie usunięcia danego powiadomienia
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @param notificationId adres ID powiadomienia do usunięcia
+     * @return status HTTP
+     */
     @DeleteMapping(path = "/deleteNotification/{notificationId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<HttpStatus> deleteNotification(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, @PathVariable Long notificationId) {
         try {
@@ -292,6 +361,12 @@ public class UserController {
         }
     }
 
+    /**
+     * Metoda obsługująca żądanie usunięcia danego powiadomienia, na podstawie nazwy użytkownika, do którego jest ono przypisane
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @param username nazwa użytkownika
+     * @return status HTTP
+     */
     @DeleteMapping(path = "/deleteNotificationByUsersData/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<HttpStatus> deleteNotificationByUsersData(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, @PathVariable String username) {
         try {
@@ -307,6 +382,12 @@ public class UserController {
         }
     }
 
+    /**
+     * Metoda obsługująca żądanie dodania nowego przyjaciela
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @param userRelation obiekt zawierający informacje o nowym przyjacielu
+     * @return status HTTP
+     */
     @PostMapping(path = "/addFriend", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<HttpStatus> addFriend(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, @RequestBody UserRelation userRelation) {
         try {
@@ -330,6 +411,12 @@ public class UserController {
         }
     }
 
+    /**
+     * Metoda obsługująca żądanie usunięcia przyjaciela
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @param friendId adres ID przyjaciela
+     * @return status HTTP
+     */
     @DeleteMapping(path = "/deleteFriend/{friendId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<HttpStatus> deleteFriend(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, @PathVariable Long friendId) {
         try {

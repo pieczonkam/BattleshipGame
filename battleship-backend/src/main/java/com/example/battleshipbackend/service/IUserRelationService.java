@@ -4,6 +4,9 @@ import com.example.battleshipbackend.model.UserRelation;
 
 import java.util.List;
 
+/**
+ * Interfejs implementowany przez klasę UserRelationService
+ */
 public interface IUserRelationService {
 
     List<UserRelation> checkIfRelationExists(Long id1, Long id2);

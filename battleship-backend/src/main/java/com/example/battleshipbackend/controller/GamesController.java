@@ -17,18 +17,32 @@ import javax.persistence.Tuple;
 import java.sql.Timestamp;
 import java.util.*;
 
+/**
+ * Klasa pełniąca rolę kontrolera dla zapytań związanych z grami
+ */
 @RestController
 @CrossOrigin
 @RequestMapping("/games")
 public class GamesController {
 
+    /**
+     * Obiekt GameService pozwalający na wykonanie poszczególnych operacji na bazie danych
+     */
     @Autowired
     private IGameService gameService;
+    /**
+     * Obiekt UserService pozwalający na wykonanie poszczególnych operacji na bazie danych
+     */
     @Autowired
     private IUserService userService;
 
+    /**
+     * Metoda obsługująca żądanie zwrócenia gier danego użytkownika
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @return status HTTP oraz lista gier danego użytkownika
+     */
     @GetMapping(path = "/getGames", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<HashMap<String, String>>> getGamesTest(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+    public ResponseEntity<List<HashMap<String, String>>> getGames(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         try {
             String jwt = authorizationHeader.replace("Bearer ", "");
             if (!JWTUtils.validateJWT(jwt)) {
@@ -53,6 +67,12 @@ public class GamesController {
         }
     }
 
+    /**
+     * Metoda obsługująca żądanie zapisu gry dwóch użytkowników
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @param usernames obiekt zawierający nazwy dwóch użytkowników
+     * @return status HTTP oraz stosowny komunikat
+     */
     @PostMapping(path = "/saveGame", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> saveGame(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, @RequestBody Usernames usernames) {
         try {

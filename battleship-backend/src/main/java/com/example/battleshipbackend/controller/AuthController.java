@@ -12,14 +12,25 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Klasa pełniąca rolę kontrolera dla zapytań związanych z autentykacją
+ */
 @RestController
 @CrossOrigin
 @RequestMapping("/auth")
 public class AuthController {
 
+    /**
+     * Obiekt UserService pozwalający na wykonanie poszczególnych operacji na bazie danych
+     */
     @Autowired
     private IUserService userService;
 
+    /**
+     * Metoda obsługująca żądanie logowania
+     * @param user dane użytkownika, który chce się zalogować
+     * @return status HTTP oraz odpowiedni komunikat
+     */
     @PostMapping(path = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> login(@RequestBody User user) {
         try {
@@ -39,6 +50,11 @@ public class AuthController {
         }
     }
 
+    /**
+     * Metoda obsługująca żądanie rejestracji
+     * @param user dane użytkownika, który chce się zarejestrować
+     * @return status HTTP oraz odpowiedni komunikat
+     */
     @PostMapping(path = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> register(@RequestBody User user) {
         try {
@@ -60,6 +76,11 @@ public class AuthController {
         }
     }
 
+    /**
+     * Metoda sprawdzająca, czy przekazany token JWT jest poprawny
+     * @param authorizationHeader nagłówek zawierający token JWT
+     * @return status HTTP oraz wartość logiczna wskazująca, czy token JWT jest poprawny
+     */
     @GetMapping(path = "/jwtValidation", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Boolean> jwtValidation(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         try {
