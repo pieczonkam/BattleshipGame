@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.Tuple;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -278,10 +281,15 @@ public class UserController {
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
+            Instant nowUtc = Instant.now();
+            ZoneId europeWarsaw = ZoneId.of("Europe/Warsaw");
+            ZonedDateTime nowEuropeWarsaw = ZonedDateTime.ofInstant(nowUtc, europeWarsaw);
+            Date currentTime = Date.from(nowEuropeWarsaw.toInstant());
+
             if (notifications.size() == 1) {
                 Notification _notification = notifications.get(0);
 
-                _notification.setNotificationDate(new Timestamp((new Date()).getTime()));
+                _notification.setNotificationDate(new Timestamp(currentTime.getTime()));
                 notificationService.addNotification(_notification);
 
                 return new ResponseEntity<>(HttpStatus.OK);
@@ -291,14 +299,14 @@ public class UserController {
 
             if (notificationType.equals("invite-friend")) {
                 if (!relationExists) {
-                    notificationService.addNotification(new Notification(userId, fromUser, new Timestamp((new Date()).getTime()), notification.getType()));
+                    notificationService.addNotification(new Notification(userId, fromUser, new Timestamp(currentTime.getTime()), notification.getType()));
                 }
             } else if (notificationType.equals("invite-game")) {
                 if (!relationExists) {
                     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                 }
 
-                notificationService.addNotification(new Notification(userId, fromUser, new Timestamp((new Date()).getTime()), notification.getType()));
+                notificationService.addNotification(new Notification(userId, fromUser, new Timestamp(currentTime.getTime()), notification.getType()));
             }
 
             return new ResponseEntity<>(HttpStatus.OK);

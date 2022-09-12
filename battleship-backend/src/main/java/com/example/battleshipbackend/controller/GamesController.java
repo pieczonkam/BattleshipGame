@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.Tuple;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -84,7 +87,12 @@ public class GamesController {
             Long id1 = userService.getUserByUsername(usernames.getUsername1()).getUserId();
             Long id2 = userService.getUserByUsername(usernames.getUsername2()).getUserId();
 
-            gameService.addGame(new Game(id1, id2, new Timestamp((new Date()).getTime()), id1));
+            Instant nowUtc = Instant.now();
+            ZoneId europeWarsaw = ZoneId.of("Europe/Warsaw");
+            ZonedDateTime nowEuropeWarsaw = ZonedDateTime.ofInstant(nowUtc, europeWarsaw);
+            Date currentTime = Date.from(nowEuropeWarsaw.toInstant());
+
+            gameService.addGame(new Game(id1, id2, new Timestamp(currentTime.getTime()), id1));
 
             return new ResponseEntity<>("Game saved", HttpStatus.OK);
         } catch (Exception e) {
