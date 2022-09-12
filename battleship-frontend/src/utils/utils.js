@@ -1,5 +1,6 @@
 import { BOARD_SIZE } from "./constants";
 
+// Funkcja zwracająca losową liczbę całkowitą z podanego zakresu
 const getRandomInt = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -7,6 +8,7 @@ const getRandomInt = (min, max) => {
     return Math.floor(Math.random() * (max - min)) + min;
 }
 
+// Funkcja zwracająca mapę planszy w postaci tablicy dwuwymiarowej o podanym rozmiarze
 const prepareBoardMap = (board_size) => {
     var board_map = [];
 
@@ -22,6 +24,7 @@ const prepareBoardMap = (board_size) => {
     return board_map;
 }
 
+// Funkcja sprawdzająca, czy podany adres e-mail jest poprawny
 const validateEmail = (email) => {
     let email_valid = String(email)
           .toLowerCase()
@@ -31,6 +34,7 @@ const validateEmail = (email) => {
     return email_valid;
 }
 
+// Funkcja czyszcząca dane gry z localStorage
 const clearGameData = () => {
     localStorage.removeItem('your_move');
     localStorage.removeItem('opponent');
@@ -50,6 +54,7 @@ const clearGameData = () => {
     localStorage.setItem('opponent_hits_map', JSON.stringify(prepareBoardMap(BOARD_SIZE)));    
 }
 
+// Funkcja ustawiająca aktualny link w panelu nawigacji
 const switchNavLink = (nav_link) => {
     const nav_links = [
         'navlink-1',
@@ -72,6 +77,7 @@ const switchNavLink = (nav_link) => {
     }
 }
 
+// Funkcja sprawdzająca, czy dany statek został zniszczony
 const isShipSunk = (hits_map, ship_parameters) => {
     var ship_length      = parseInt(ship_parameters.split(' ')[0]);
     var ship_orientation = ship_parameters.split(' ')[1];

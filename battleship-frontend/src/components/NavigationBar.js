@@ -8,6 +8,7 @@ import { faUserPlus,
         faUser }                from '@fortawesome/free-solid-svg-icons';
 import { logOut }               from '../utils/utilsAPI';
 
+// Komponent panelu nawigacji
 function NavigationBar(props) {
     return (
         <Navbar collapseOnSelect expand='md' bg='dark' variant='dark' className='px-2'>

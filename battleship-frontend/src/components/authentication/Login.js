@@ -2,14 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { loginRequest }               from '../../utils/requestsAPI';
 import { switchNavLink }              from '../../utils/utils';
 import { setLoginData }               from '../../utils/utilsAPI';
- 
+
+// Komponent panelu logowania
 function Login() {
+    // Hook stanu
     const [error_messages, setErrorMessages] = useState([]);
 
+    // Hook efektu
     useEffect(() => {
         switchNavLink('navlink-4');
     }, []);
 
+    // Obiekt zawierający komunikaty błędów
     const errors = {
         email_missing: 'Proszę podać adres e-mail',
         pass_missing:  'Proszę podać hasło',
@@ -18,6 +22,7 @@ function Login() {
         server_error:  'Coś poszło nie tak, spróbuj ponownie'
     };
 
+    // Funkcja obsługująca zdarzenie próby logowania
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -55,6 +60,7 @@ function Login() {
         setErrorMessages(error_messages_arr);
     };
 
+    // Funkcja wyświetlająca wiadomości o błędach
     const renderErrorMessage = (name, type = 'default') => {
         const error_message = error_messages.find(em => em.name === name);
         

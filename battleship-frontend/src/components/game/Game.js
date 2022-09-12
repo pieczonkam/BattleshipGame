@@ -23,7 +23,9 @@ import { logOut, logOutCancel}                 from '../../utils/utilsAPI';
 import { addGameRequest, 
         deleteNotificationByUsersDataRequest } from '../../utils/requestsAPI';
 
+// Komponent panelu gry
 function Game(props) {
+    // Hook'i stanu
     const [ships_vertical_state, setShipsVerticalState] = useState(false);
     const [drag_over_update, setDragOverUpdate]         = useState(true);
     const [ships_horizontal, setShipsHorizontal]        = useState([]);
@@ -36,8 +38,10 @@ function Game(props) {
     const [not_your_move_screen, setNotYourMoveScreen]  = useState(false);
     const [time_over, setTimeOver]                      = useState(false);
     
+    // Hook nawigacji
     const navigate = useNavigate();
 
+    // Hook efektu
     useEffect(() => {
         var opponent = localStorage.getItem('opponent');
 
@@ -49,6 +53,7 @@ function Game(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [time_over]);
 
+    // Hook efektu
     useEffect(() => {  
         const setShipsUE = () => {
             var ships_id             = ['ship-1', 'ship-2', 'ship-3', 'ship-4', 'ship-5'];
@@ -115,6 +120,7 @@ function Game(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Hook efektu
     useEffect(() => {
         const setShipsSunkUE = () => {
             var ships_sunk_arr      = [];
@@ -138,6 +144,7 @@ function Game(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.new_ship_sunk])
 
+    // Funkcja przygotowująca plansze
     const getBoard = (type) => {
         var board_tiles_arr = [];
         for (let i = 0; i < BOARD_SIZE + 1; ++i) {
@@ -165,6 +172,7 @@ function Game(props) {
         return board_tiles_arr;
     }
 
+    // Funkcja obsługująca zdarzenie rozpoczęcia gry
     const startGame = () => {
         var opponent = localStorage.getItem('opponent');
 
@@ -204,6 +212,7 @@ function Game(props) {
         }
     }
 
+    // Funkcja obsługująca zdarzenie opuszczenia gry
     const leaveGame = async () => {
         var opponent = localStorage.getItem('opponent');
         if (opponent) {
@@ -225,6 +234,7 @@ function Game(props) {
         navigate('/profile');
     }
 
+    // Funkcja obsługująca zdarzenie poddania się
     const surrender = async () => {
         var opponent = localStorage.getItem('opponent');
         var username = localStorage.getItem('username');
@@ -246,6 +256,7 @@ function Game(props) {
         navigate('/profile');
     }
 
+    // Funkcja resetująca ustawienie statków
     const resetShips = () => {
         if (localStorage.getItem('you_ready') !== 'true') {
             localStorage.removeItem('ships_set');
@@ -256,6 +267,7 @@ function Game(props) {
         }
     }
 
+    // Funkcja obsługująca zdarzenie odrzucenia gry przez przeciwnika
     const handleGameInviteDeclined = () => {
         props.setOpponentReady(false);
         props.setGameInviteDeclined(false);
@@ -263,6 +275,7 @@ function Game(props) {
         navigate('/profile');
     }
 
+    // Funkcja obsługująca zdarzenie opuszczenia gry przez przeciwnika
     const cancelGame = () => {
         props.setOpponentReady(false);
         props.setGameCancel(false);
@@ -270,6 +283,7 @@ function Game(props) {
         navigate('/profile');
     }
 
+    // Funkcja obsługująca zdarzenie poddania się przeciwnika
     const handleOpponentSurrender = () => {
         props.setOpponentReady(false);
         props.setOpponentSurrender(false);
@@ -278,6 +292,7 @@ function Game(props) {
         navigate('/profile');
     }
 
+    // Funkcja obsługująca zdarzenie utraty połączenia z przeciwnikiem
     const handleConnectionLost = () => {
         props.setOpponentReady(false);
         props.setGameStarted(false);
@@ -286,6 +301,7 @@ function Game(props) {
         navigate('/profile');
     }
 
+    // Funkcja obsługująca zdarzenie końca gry
     const handleGameOver = async (save_result) => {
         var opponent = localStorage.getItem('opponent');
         var username = localStorage.getItem('username');
@@ -304,6 +320,7 @@ function Game(props) {
         navigate('/profile');
     }
 
+    // Funkcja obsługująca zdarzenie wylogowania się podczas trwającej gry
     const handleLogoutDuringGame = async () => {
         var opponent = localStorage.getItem('opponent');
         var username = localStorage.getItem('username');
@@ -322,6 +339,7 @@ function Game(props) {
         logOut(true);
     }
 
+    // Funkcja obsługująca zdarzenie wylogowania się podczas przygotowania do gry
     const handleLogoutDuringPrep = async () => {
         var opponent = localStorage.getItem('opponent');
         if (opponent) {

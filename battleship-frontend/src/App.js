@@ -18,9 +18,12 @@ import Profile                        from './components/profile/Profile';
 
 var stomp_client = null;
 
+// Główny komponent aplikacji
 function App() {  
+    // Hook nawigacji
     const navigate = useNavigate();
 
+    // Hook'i stanu
     const [logged_in, setLoggedIn]                      = useState(null);
     const [game_invite_declined, setGameInviteDeclined] = useState(false);
     const [game_cancel, setGameCancel]                  = useState(false);
@@ -34,6 +37,7 @@ function App() {
     const [current_time, setCurrentTime]                = useState(localStorage.getItem('current_time') ? localStorage.getItem('current_time') : (new Date()).getTime());
     const [your_move, setYourMove]                      = useState(localStorage.getItem('your_move') === 'true' ? true : false);
 
+    // Funkcja przetwarzająca wiadomość otrzymaną przez protokół WebSocket
     const getWsMessage = (payload) => {
         const message  = JSON.parse(payload.body);
         const opponent = localStorage.getItem('opponent');
@@ -229,6 +233,7 @@ function App() {
         }
     }
 
+    // Funkcja wysyłająca wiadomość protokołem WebSocket
     const sendWsMessage = (receiver, message, status) => {
         var username = localStorage.getItem('username');
 
@@ -246,6 +251,7 @@ function App() {
         }
     }
 
+    // Hook efektu
     useEffect(() => {
         const wsConnect = () => {
             let sock = new SockJS(API_URL + '/ws');

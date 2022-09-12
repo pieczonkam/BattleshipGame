@@ -1,11 +1,14 @@
 import React, { useState, useEffect} from 'react'
 
+// Komponent zegara
 const Timer = (props) => {
+    // Hook'i stanu
     const [minutes, setMinutes]                = useState(props.minutes);
     const [seconds, setSeconds]                = useState(props.seconds);
     const [current_minutes, setCurrentMinutes] = useState(0);
     const [current_seconds, setCurrentSeconds] = useState(0);
     
+    // Hook efektu
     useEffect(() => {
         var delta_time = Math.floor(((new Date()).getTime() - props.current_time) / 1000);
         var time_total = props.minutes * 60 + props.seconds - delta_time;
@@ -20,6 +23,7 @@ const Timer = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.current_time]);
 
+    // Hook efektu
     useEffect(() => {
         if (props.stop_time) {
             setCurrentMinutes(minutes);
@@ -28,6 +32,7 @@ const Timer = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.stop_time]);
 
+    // Hook efektu
     useEffect(() => {
     let myInterval = setInterval(() => {
             if (seconds > 0) {

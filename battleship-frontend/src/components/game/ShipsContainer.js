@@ -1,6 +1,8 @@
 import React from 'react';
 
+// Komponent pojeminka na statki
 function ShipsContainer(props) {
+    // Funkcja obsługująca zdarzenie upuszczenia innego elementu
     const drop = e => {
         e.preventDefault();
 
@@ -19,6 +21,7 @@ function ShipsContainer(props) {
         e.target.appendChild(ship);
     }
     
+    // Funkcja obsługująca zdarzenie przeciągnięcia innego elementu
     const dragOver = e => {
         e.preventDefault();
     }

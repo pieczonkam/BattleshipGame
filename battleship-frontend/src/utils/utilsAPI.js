@@ -1,6 +1,7 @@
 import { jwtValidRequest, userDataRequest } from "./requestsAPI";
 import { clearGameData }                    from "./utils";
 
+// Funkcja zapisująca dane użytkownika do localStorage
 const setLoginData = async (jwt) => {
     localStorage.setItem('jwt', jwt);
 
@@ -13,6 +14,7 @@ const setLoginData = async (jwt) => {
     }
 }
 
+// Funkcja przeprowadzająca operację wylogowania
 const logOut = (forced=false) => {
     if (!forced) {
         if (localStorage.getItem('game_started')) {
@@ -33,12 +35,14 @@ const logOut = (forced=false) => {
     window.location.reload(false);
 }
 
+// Funkcja anulująca wylogowanie
 const logOutCancel = () => {
     localStorage.setItem('logout_during_game', 'false');
     localStorage.setItem('logout_during_prep', 'false');
     window.location.reload(false);
 }
 
+// Funkcja sprawdzająca, czy użytkownik jest zalogowany
 const isLoggedIn = async () => {
     const jwt = localStorage.getItem('jwt');
 

@@ -30,7 +30,9 @@ import { logOut, logOutCancel }               from '../../utils/utilsAPI';
 import { switchNavLink,
         clearGameData }                       from '../../utils/utils';
 
+// Komponent panelu profilu
 function Profile(props) {
+    // Hook'i stanu
     const [user_data, setUserData] = useState({username: '', email: ''});
     const [user_friends, setUserFriends] = useState([]);
     const [user_potential_friends, setUserPotentialFriends] = useState([]);
@@ -38,8 +40,10 @@ function Profile(props) {
     const [messages, setMessages] = useState([]);    
     const [notifications, setNotifications] = useState([]);
     
+    // Hook nawigacji
     const navigate = useNavigate();
 
+    // Funkcja obsługująca panel wyszukiwania użytkowników
     const handleSubmitSearch = async (e) => {
         e.preventDefault();
 
@@ -59,6 +63,7 @@ function Profile(props) {
         }
     }
 
+    // Obiekt zawierający komunikaty błędów
     const errors = {
         email_missing:   'Proszę podać adres e-mail',
         uname_missing:   'Proszę podać nazwę użytkownika',
@@ -73,12 +78,14 @@ function Profile(props) {
         server_error:    'Coś poszło nie tak, spróbuj ponownie'
     };
 
+    // Obiekt zawierający komunikaty powodzeń
     const successes = {
         change_uname_success:    'Nazwa użytkownika została zmieniona',
         change_email_success:    'Adres e-mail został zmieniony',
         change_password_success: 'Hasło zostało zmienione'
     }
 
+    // Funkcja obsługująca panele zmiany danych użytkownika
     const handleSubmit = async (e, type) => {
         e.preventDefault();
 
@@ -195,21 +202,25 @@ function Profile(props) {
         }
     }
 
+    // Funkcja obsługująca panel zmiany nazwy użytkownika
     const handleSubmitUname = e => {
         refreshContent();
         handleSubmit(e, 'uname');
     }
 
+    // Funkcja obsługująca panel zmiany adresu e-mail użytkownika
     const handleSubmitEmail = e => {
         refreshContent();
         handleSubmit(e, 'email');
     }
 
+    // Funkcja obsługująca panel zmiany hasła użytkownika
     const handleSubmitPass = e => {
         refreshContent();
         handleSubmit(e, 'pass');
     }
 
+    // Funkcja wyświetlająca wiadomości o błędach / powodzeniach
     const renderMessage = (name, type = 'default') => {
         const message = messages.find(m => m.name === name);
 
@@ -230,6 +241,7 @@ function Profile(props) {
         }
     };
 
+    // Funkcja obsługująca zdarzenie akceptacji gry
     const handleGameAccept = (username) => {
         props.sendWsMessage(username, '', 'ACCEPT');
         localStorage.setItem('opponent_joined', 'true');
@@ -237,11 +249,13 @@ function Profile(props) {
         navigate('/game');
     }
 
+    // Funkcja obsługująca zdarzenie odrzucenia gry
     const handleGameDecline = (username) => {
         props.sendWsMessage(username, '', 'DECLINE');
         refreshContent();
     }
 
+    // Funkcja obsługująca zdarzenie zaproszenia do gry
     const handleGameInvite = async (user_id, username) => {
         const status = await addNotificationRequest(localStorage.getItem('jwt'), {
             userId: user_id,
@@ -258,6 +272,7 @@ function Profile(props) {
         }
     }
 
+    // Funkcja obsługująca zdarzenie zaproszenia do znajomych
     const handleFriendInvite = async (index, user_id) => {
         var user_potential_friends_arr             = structuredClone(user_potential_friends);
         user_potential_friends_arr[index].disabled = true;
@@ -274,6 +289,7 @@ function Profile(props) {
         }
     }
 
+    // Funkcja obsługująca zdarzenie usunięcia znajomego
     const handleFriendDelete = async (user_id) => {
         const status = await deleteFriendRequest(localStorage.getItem('jwt'), user_id);
 
@@ -284,6 +300,7 @@ function Profile(props) {
         }
     }
 
+    // Funkcja pobierająca listę znajomych
     const getUserFriends = async () => {
         const [ response, status ] = await userFriendsRequest(localStorage.getItem('jwt'));
 
@@ -294,6 +311,7 @@ function Profile(props) {
         }
     }
 
+    // Funkcja pobierająca listę użytkowników, którzy nie są jeszcze znajomymi
     const getUserPotentialFriends = async () => {
         const [ response, status ] = await userPotentialFriendsRequest(localStorage.getItem('jwt'), '*');
 
@@ -307,6 +325,7 @@ function Profile(props) {
         }
     }
 
+    // Funkcja pobierająca listę gier
     const getUserGames = async () => {
         const [ response, status ] = await userGamesRequest(localStorage.getItem('jwt'));
 
@@ -317,6 +336,7 @@ function Profile(props) {
         }
     }
 
+    // Funkcja pobierająca listę powiadomień
     const getNotifications = async () => {
         const [ response, status ] = await getNotificationsRequest(localStorage.getItem('jwt'));
 
@@ -335,6 +355,7 @@ function Profile(props) {
         }
     }
 
+    // Funkcja odświeżająca zawartość strony
     const refreshContent = () => {
         getUserFriends();
         getUserPotentialFriends();
@@ -344,6 +365,7 @@ function Profile(props) {
         document.forms[3].reset();
     }
 
+    // Funkcja obsługująca zdarzenie odrzucenia gry przez przeciwnika
     const handleGameInviteDeclined = () => {
         props.setOpponentReady(false);
         props.setGameInviteDeclined(false);
@@ -351,6 +373,7 @@ function Profile(props) {
         navigate('/profile');
     }
 
+    // Funkcja obsługująca zdarzenie opuszczenia gry przez przeciwnika
     const cancelGame = () => {
         props.setOpponentReady(false);
         props.setGameCancel(false);
@@ -358,6 +381,7 @@ function Profile(props) {
         navigate('/profile');
     }
 
+    // Funkcja obsługująca zdarzenie poddania się przeciwnika
     const handleOpponentSurrender = () => {
         props.setOpponentReady(false);
         props.setOpponentSurrender(false);
@@ -366,6 +390,7 @@ function Profile(props) {
         navigate('/profile');
     }
 
+    // Funkcja obsługująca zdarzenie utraty połączenia z przeciwnikiem
     const handleConnectionLost = () => {
         props.setOpponentReady(false);
         props.setGameStarted(false);
@@ -374,6 +399,7 @@ function Profile(props) {
         navigate('/profile');
     }
 
+    // Funkcja obsługująca zdarzenie końca gry
     const handleGameOver = async (save_result) => {
         var opponent = localStorage.getItem('opponent');
         var username = localStorage.getItem('username');
@@ -392,6 +418,7 @@ function Profile(props) {
         navigate('/profile');
     }
 
+    // Funkcja obsługująca zdarzenie wylogowania się podczas trwającej gry
     const handleLogoutDuringGame = async () => {
         var opponent = localStorage.getItem('opponent');
         var username = localStorage.getItem('username');
@@ -410,6 +437,7 @@ function Profile(props) {
         logOut(true);
     }
 
+    // Funkcja obsługująca zdarzenie wylogowania się podczas przygotowania do gry
     const handleLogoutDuringPrep = async () => {
         var opponent = localStorage.getItem('opponent');
         if (opponent) {
@@ -425,6 +453,7 @@ function Profile(props) {
         logOut(true);
     }
 
+    // Hook efektu
     useEffect(() => {
         const handleGameAcceptUE = (username) => {
             props.sendWsMessage(username, '', 'ACCEPT');

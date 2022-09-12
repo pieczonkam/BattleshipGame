@@ -1,6 +1,8 @@
 import React from 'react';
 
+// Komponent statku
 function Ship(props) {
+    // Funkcja obsługująca zdarzenie rozpoczęcia przenoszenia elementu
     const dragStart = e => {
         localStorage.setItem('ship_id', e.target.id);
         
@@ -9,11 +11,13 @@ function Ship(props) {
         }, 0);
     }
 
+    // Funkcja obsługująca zdarzenie przeciągnięcia innego elementu
     const dragOver = e => {
         e.stopPropagation();
         e.preventDefault();
     }
 
+    // Funkcja obsługująca zdarzenie zakończenia przenoszenia elementu
     const dragEnd = e => {
         localStorage.removeItem('ship_id');
 

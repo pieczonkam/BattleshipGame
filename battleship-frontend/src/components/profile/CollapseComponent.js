@@ -2,7 +2,9 @@ import { React, useState } from 'react';
 import Button              from 'react-bootstrap/Button';
 import Collapse            from 'react-bootstrap/Collapse';
 
+// Komponent zwijanego menu
 function CollapseComponent(props) {
+    // Hook stanu
     const [open, setOpen] = useState(false);
 
     return (

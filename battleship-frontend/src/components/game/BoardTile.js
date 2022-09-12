@@ -5,9 +5,12 @@ import { clearGameData,
        prepareBoardMap } from '../../utils/utils';
 import { BOARD_SIZE }    from '../../utils/constants';
 
+// Komponent kafelka na planszy
 function BoardTile(props) {
+    // Hook nawigacji
     const navigate = useNavigate();
 
+    // Funkcja sprawdzająca, czy ustawienie statku na planszy jest poprawne
     const shipPositionValid = (target, ship) => {
         // Check if tile is already occupied
         if (target.hasChildNodes()) {
@@ -73,6 +76,7 @@ function BoardTile(props) {
         return true;
     }
 
+    // Funkcja ustawiająca kolor tła planszy A
     const setBoardABgColor = (tile, ship, mode) => {
         var ship_class       = [...ship.classList].filter(el => el !== 'Game-ship')[0];
         var ship_length      = parseInt(ship_class.split('-')[1]) + 1;
@@ -120,6 +124,7 @@ function BoardTile(props) {
         }
     }
 
+    // Funkcja obsługująca zdarzenie upuszczenia innego elementu
     const drop = e => {
         e.preventDefault();
 
@@ -168,6 +173,7 @@ function BoardTile(props) {
         }        
     }
     
+    // Funkcja obsługująca zdarzenie przeciągnięcia innego elementu nad
     const dragOver = e => {
         e.preventDefault();
 
@@ -188,6 +194,7 @@ function BoardTile(props) {
         }
     }
 
+    // Funkcja obsługująca zdarzenie przeciągnięcia innego elementy poza
     const dragLeave = e => {
         e.preventDefault();
 
@@ -206,6 +213,7 @@ function BoardTile(props) {
         props.setDragOverUpdate(true);
     }
 
+    // Funkcja obsługująca zdarzenie kliknięcia na planszy B
     const onBoardBClick = e => {
         if (localStorage.getItem('game_started') === 'true') {
             var opponent = localStorage.getItem('opponent');

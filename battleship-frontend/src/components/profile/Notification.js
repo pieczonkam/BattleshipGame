@@ -6,7 +6,9 @@ import { addFriendRequest,
         deleteNotificationRequest }  from '../../utils/requestsAPI';
 import { logOut }                    from '../../utils/utilsAPI';
 
+// Komponent powiadomienia
 function Notification(props) {
+    // Funkcja obsługująca zdarzenie kliknięcia
     const handleNotificationClick = async (type) => {
         if (type === 'decline') {
             const status = await deleteNotificationRequest(localStorage.getItem('jwt'), props.notification_id);

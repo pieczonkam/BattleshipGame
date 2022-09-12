@@ -4,13 +4,17 @@ import { registerRequest }            from '../../utils/requestsAPI';
 import { validateEmail }              from '../../utils/utils';
 import { switchNavLink }              from '../../utils/utils';
 
+// Komponent panelu rejestracji
 function Register() {
+    // Hook stanu
     const [messages, setMessages] = useState([]);
 
+    // Hook efektu
     useEffect(() => {
         switchNavLink('navlink-5');
     }, []);
 
+    // Obiekt zawierający komunikaty błędów
     const errors = {
         email_missing:   'Proszę podać adres e-mail',
         uname_missing:   'Proszę podać nazwę użytkownika',
@@ -27,8 +31,10 @@ function Register() {
         server_error:    'Coś poszło nie tak, spróbuj ponownie'
     };
 
+    // Komunikat powodzenia
     const register_success_message = 'Rejestracja powiodła się';
 
+    // Funkcja obsługująca zdarzenie próby rejestracji
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -105,6 +111,7 @@ function Register() {
         setMessages(messages_arr);
     };
 
+    // Funkcja wyświetlająca wiadomości o błędach / powodzeniu
     const renderMessage = (name, type = 'default') => {
         const message = messages.find(m => m.name === name);
 

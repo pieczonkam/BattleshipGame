@@ -1,6 +1,7 @@
 import axios       from 'axios';
 import { API_URL } from "./constants";
 
+// Funkcja wysyłająca żądanie rejestracji
 const registerRequest = async (user_data) => {
     try {
         const response = await axios.post(API_URL + '/auth/register', user_data);
@@ -10,6 +11,7 @@ const registerRequest = async (user_data) => {
     }
 }
 
+// Funkcja wysyłająca żądanie logowania
 const loginRequest = async (user_data) => {
     try {
         const response = await axios.post(API_URL + '/auth/login', user_data);
@@ -19,6 +21,7 @@ const loginRequest = async (user_data) => {
     }
 }
 
+// Funkcja wysyłająca żądanie sprawdzenia poprawności tokenu JWT
 const jwtValidRequest = async (jwt) => {
     try {
         const response = await axios.get(API_URL + '/auth/jwtValidation', {
@@ -33,6 +36,7 @@ const jwtValidRequest = async (jwt) => {
     }
 }
 
+// Funkcja wysyłająca żądanie zwrócenia danych użytkownika
 const userDataRequest = async (jwt) => {
     try {
         const response = await axios.get(API_URL + '/users/getUser', {
@@ -47,6 +51,7 @@ const userDataRequest = async (jwt) => {
     }
 }
 
+// Funkcja wysyłająca żądanie zwrócenia listy znajomych danego użytkownika
 const userFriendsRequest = async (jwt) => {
     try {
         const response = await axios.get(API_URL + '/users/getFriends', {
@@ -61,6 +66,7 @@ const userFriendsRequest = async (jwt) => {
     }
 }
 
+// Funkcja wysyłająca żądanie zwrócenia listy użytkowników, którzy nie są jeszcze znajomymi danego użytkownika
 const userPotentialFriendsRequest = async (jwt, pattern) => {
     try {
         const response = await axios.get(API_URL + '/users/getPotentialFriends/' + pattern, {
@@ -75,6 +81,7 @@ const userPotentialFriendsRequest = async (jwt, pattern) => {
     }
 }
 
+// Funkcja wysyłająca żądanie zwrócenia gier danego użytkownika
 const userGamesRequest = async (jwt) => {
     try {
         const response = await axios.get(API_URL + '/games/getGames', {
@@ -89,6 +96,7 @@ const userGamesRequest = async (jwt) => {
     }
 }
 
+// Funkcja wysyłająca żądanie zmiany adresu e-mail użytkownika
 const changeEmailRequest = async (jwt, user_data) => {
     try {
         const response = await axios.put(API_URL + '/users/changeEmail', 
@@ -104,6 +112,7 @@ const changeEmailRequest = async (jwt, user_data) => {
     }
 }
 
+// Funkcja wysyłająca żądanie zmiany nazwy użytkownika
 const changeUsernameRequest = async (jwt, user_data) => {
     try {
         const response = await axios.put(API_URL + '/users/changeUsername', 
@@ -119,6 +128,7 @@ const changeUsernameRequest = async (jwt, user_data) => {
     }
 }
 
+// Funkcja wysyłająca żądanie sprawdzenia poprawności hasła użytkownika
 const checkPasswordRequest = async (jwt, user_data) => {
     try {
         const response = await axios.post(API_URL + '/users/passwordCorrect',
@@ -134,6 +144,7 @@ const checkPasswordRequest = async (jwt, user_data) => {
     }
 }
 
+// Funkcja wysyłająca żądanie zmiany hasła użytkownika
 const changePasswordRequest = async (jwt, user_data) => {
     try {
         const response = await axios.put(API_URL + '/users/changePassword',
@@ -149,6 +160,7 @@ const changePasswordRequest = async (jwt, user_data) => {
     }
 }
 
+// Funkcja wysyłająca żądanie dodania nowego powiadomienia
 const addNotificationRequest = async (jwt, notification_data) => {
     try {
         const response = await axios.post(API_URL + '/users/addNotification',
@@ -164,6 +176,7 @@ const addNotificationRequest = async (jwt, notification_data) => {
     }
 }
 
+// Funkcja wysyłająca żądanie zwrócenia listy powiadomień użytkownika
 const getNotificationsRequest = async (jwt) => {
     try {
         const response = await axios.get(API_URL + '/users/getNotifications', {
@@ -178,6 +191,7 @@ const getNotificationsRequest = async (jwt) => {
     }
 }
 
+// Funkcja wysyłająca żądanie usunięcia danego powiadomienia
 const deleteNotificationRequest = async (jwt, notification_id) => {
     try {
         const response = await axios.delete(API_URL + '/users/deleteNotification/' + notification_id, {
@@ -192,6 +206,7 @@ const deleteNotificationRequest = async (jwt, notification_id) => {
     }
 }
 
+// Funkcja wysyłająca żądanie usunięcia danego powiadomienia
 const deleteNotificationByUsersDataRequest = async (jwt, username) => {
     try {
         const response = await axios.delete(API_URL + '/users/deleteNotificationByUsersData/' + username, {
@@ -206,6 +221,7 @@ const deleteNotificationByUsersDataRequest = async (jwt, username) => {
     }
 }
 
+// Funkcja wysyłająca żądanie dodania nowego znajomego
 const addFriendRequest = async (jwt, user_relation_data) => {
     try {
         const response = await axios.post(API_URL + '/users/addFriend',
@@ -221,6 +237,7 @@ const addFriendRequest = async (jwt, user_relation_data) => {
     }
 }
 
+// Funkcja wysyłająca żądanie usunięcia znajomego
 const deleteFriendRequest = async (jwt, friend_id) => {
     try {
         const response = await axios.delete(API_URL + '/users/deleteFriend/' + friend_id, {
@@ -235,6 +252,7 @@ const deleteFriendRequest = async (jwt, friend_id) => {
     }
 }
 
+// Funkcja wysyłająca żądanie dodania nowej gry
 const addGameRequest = async (jwt, game_data) => {
     try {
         const response = await axios.post(API_URL + '/games/saveGame',
