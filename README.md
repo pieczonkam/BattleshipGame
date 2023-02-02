@@ -35,6 +35,6 @@ Web application for playing Battleship with other players
   - HTML
   
 ## Screenshots
-<img src="/screenshots/battleship_game.jpg" width="750" height="450" />
-<img src="/screenshots/battleship_register.jpg" width="750" height="450" />
-<img src="/screenshots/battleship_profile.jpg" width="750" height="450" />
+<img src="/screenshots/battleship_game.jpg" />
+<img src="/screenshots/battleship_register.jpg" />
+<img src="/screenshots/battleship_profile.jpg" />
